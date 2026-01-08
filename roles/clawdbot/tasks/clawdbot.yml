@@ -41,10 +41,22 @@
     PNPM_HOME: "{{ clawdbot_home }}/.local/share/pnpm"
     PATH: "{{ clawdbot_home }}/.local/bin:{{ ansible_env.PATH }}"
 
-- name: Add pnpm bin to PATH in .bashrc
-  ansible.builtin.lineinfile:
+- name: Configure .bashrc for clawdbot user
+  ansible.builtin.blockinfile:
     path: "{{ clawdbot_home }}/.bashrc"
-    line: 'export PATH="{{ clawdbot_home }}/.local/bin:$PATH"'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Clawdbot config"
+    block: |
+      # Enable 256 colors
+      export TERM=xterm-256color
+      export COLORTERM=truecolor
+      
+      # Add pnpm to PATH
+      export PATH="{{ clawdbot_home }}/.local/bin:$PATH"
+      
+      # Color support
+      export CLICOLOR=1
+      alias ls='ls --color=auto'
+      alias grep='grep --color=auto'
     create: true
     owner: "{{ clawdbot_user }}"
     group: "{{ clawdbot_user }}"
