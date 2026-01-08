@@ -85,10 +85,11 @@ cd clawdbot-ansible
 # Install Ansible collections
 ansible-galaxy collection install -r requirements.yml
 
-# Run playbook (as root or with sudo)
-# If root: ansible-playbook playbook.yml -e ansible_become=false
-# If non-root: ansible-playbook playbook.yml --ask-become-pass
-ansible-playbook playbook.yml --ask-become-pass
+# Run installation (automatically switches to clawdbot user after completion)
+./run-playbook.sh
+
+# Or run playbook directly (then manually run /tmp/clawdbot-setup.sh after)
+# ansible-playbook playbook.yml --ask-become-pass
 ```
 
 ## License

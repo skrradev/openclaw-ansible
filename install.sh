@@ -84,87 +84,11 @@ fi
 echo ""
 
 # Run the playbook
-ansible-playbook playbook.yml $ANSIBLE_EXTRA_VARS
-
-echo ""
-echo -e "${GREEN}[5/5] Installation complete!${NC}"
-echo ""
-
-# Clawdbot ASCII Art Lobster (by jgs)
-cat << 'LOBSTER'
-[0;36m
-   +====================================================+
-   |                                                    |
-   |         [0;33mWelcome to Clawdbot! [0;31m🦞[0;36m                    |
-   |                                                    |
-   |[0;31m                   ,.---._                         [0;36m|
-   |[0;31m               ,,,,     /       `,                 [0;36m|
-   |[0;31m                \\\\\\   /    '\_  ;                [0;36m|
-   |[0;31m                 |||| /\/``-.__\;'                 [0;36m|
-   |[0;31m                 ::::/\/_                          [0;36m|
-   |[0;31m {{`-.__.-'(`(^^(^^^(^ 9 `.========='              [0;36m|
-   |[0;31m{{{{{{ { ( ( (  (   (-----:=                      [0;36m|
-   |[0;31m {{.-'~~'-.(,(,,(,,,(__6_.'=========.              [0;36m|
-   |[0;31m                 ::::\/\                           [0;36m|
-   |[0;31m                 |||| \/\  ,-'/,                   [0;36m|
-   |[0;31m                ////   \ `` _/ ;                   [0;36m|
-   |[0;31m               ''''     \  `  .'                   [0;36m|
-   |[0;31m                         `---'                     [0;36m|
-   |                                                    |
-   |           [0;32m✅  Installation Successful![0;36m             |
-   |                                                    |
-   +====================================================+[0m
-LOBSTER
-echo ""
-echo -e "${GREEN}🔒 Security Status:${NC}"
-echo "  - UFW Firewall: ENABLED"
-echo "  - Open Ports: SSH (22) + Tailscale (41641/udp)"
-echo "  - Docker isolation: ACTIVE"
-echo ""
-echo -e "📚 Documentation: ${GREEN}https://docs.clawd.bot${NC}"
-echo ""
+./run-playbook.sh $ANSIBLE_EXTRA_VARS
 
 # Cleanup
 cd /
 rm -rf "$TEMP_DIR"
 
-# Switch to clawdbot user for setup
-echo -e "${YELLOW}Switching to clawdbot user for setup...${NC}"
-echo ""
-
-$SUDO su - clawdbot << 'SETUP_EOF'
-echo "============================================"
-echo "📋 Clawdbot Setup - Next Steps"
-echo "============================================"
-echo ""
-echo "You are now: $(whoami)@$(hostname)"
-echo "Home: $HOME"
-echo ""
-echo "🔧 Setup Commands:"
-echo ""
-echo "1. Configure Clawdbot:"
-echo "   nano ~/.clawdbot/config.yml"
-echo ""
-echo "2. Login to provider (WhatsApp/Telegram/Signal):"
-echo "   clawdbot login"
-echo ""
-echo "3. Test gateway:"
-echo "   clawdbot gateway"
-echo ""
-echo "4. Exit and manage as service:"
-echo "   exit"
-echo "   sudo systemctl status clawdbot"
-echo "   sudo journalctl -u clawdbot -f"
-echo ""
-echo "5. Connect Tailscale (as root):"
-echo "   exit"
-echo "   sudo tailscale up"
-echo ""
-echo "============================================"
-echo ""
-echo "Type 'exit' to return to previous user"
-echo ""
-
-# Start interactive bash
-exec /bin/bash --login
-SETUP_EOF
+# The run-playbook.sh script will automatically launch /tmp/clawdbot-setup.sh
+# which handles the user switch and displays setup instructions

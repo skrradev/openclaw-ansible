@@ -48,7 +48,7 @@
         owner: root
         group: root
 
-    - name: Display completion message and setup instructions
+    - name: Display completion message
       ansible.builtin.debug:
         msg:
           - ""
@@ -61,29 +61,7 @@
           - "  - Open Ports: SSH (22) + Tailscale (41641/udp)"
           - "  - Docker isolation: ACTIVE"
           - ""
-          - "🚀 Launching setup wizard..."
-          - ""
-
-    - name: Launch setup script automatically
-      ansible.builtin.shell: /tmp/clawdbot-setup.sh
-      args:
-        executable: /bin/bash
-      become: false
-      when: ansible_env.TERM is defined and ansible_env.TERM != ''
-      register: setup_result
-      ignore_errors: true
-      changed_when: false
-
-    - name: Display manual setup instructions if auto-launch failed
-      ansible.builtin.debug:
-        msg:
-          - ""
-          - "⚠️  Setup wizard could not auto-launch."
-          - ""
-          - "Please run manually:"
+          - "🚀 To complete setup, run:"
           - ""
           - "    /tmp/clawdbot-setup.sh"
           - ""
-          - "📚 Documentation: https://docs.clawd.bot"
-          - ""
-      when: setup_result is defined and setup_result.failed
