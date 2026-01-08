@@ -10,19 +10,26 @@ else
     PLAYBOOK_EXIT=$?
 fi
 
-# After playbook completes successfully, launch setup wizard
+# After playbook completes successfully, switch to clawdbot user
 if [ $PLAYBOOK_EXIT -eq 0 ]; then
-    echo ""
-    echo "🚀 Launching setup wizard..."
-    sleep 1
-    echo ""
-    
-    # Check if setup script exists
-    if [ -f /tmp/clawdbot-setup.sh ]; then
-        exec /tmp/clawdbot-setup.sh
+    # Check if we have a TTY (interactive terminal)
+    if [ -t 0 ] && [ -t 1 ]; then
+        echo ""
+        echo "🚀 Switching to clawdbot user..."
+        echo ""
+        sleep 1
+        
+        # Execute the setup script content directly, then switch user
+        /tmp/clawdbot-setup.sh
     else
-        echo "❌ Setup script not found at /tmp/clawdbot-setup.sh"
-        exit 1
+        # Non-interactive - show instructions
+        echo ""
+        echo "✅ Installation complete!"
+        echo ""
+        echo "To configure Clawdbot, switch to the clawdbot user:"
+        echo ""
+        echo "    sudo -i -u clawdbot"
+        echo ""
     fi
 else
     echo "❌ Playbook failed with exit code $PLAYBOOK_EXIT"

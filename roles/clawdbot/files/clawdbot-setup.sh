@@ -93,20 +93,27 @@ rm -f ~/.clawdbot-init
 INIT_EOF
 
 chown clawdbot:clawdbot /home/clawdbot/.clawdbot-init
-echo "DEBUG: Init script created and chowned"
 
 # Add one-time sourcing to .bashrc if not already there
 grep -q '.clawdbot-init' /home/clawdbot/.bashrc 2>/dev/null || {
     echo '' >> /home/clawdbot/.bashrc
     echo '# One-time setup message' >> /home/clawdbot/.bashrc
     echo '[ -f ~/.clawdbot-init ] && source ~/.clawdbot-init' >> /home/clawdbot/.bashrc
-    echo "DEBUG: Added to .bashrc"
 }
 
-echo "DEBUG: About to exec sudo -i -u clawdbot"
-echo "DEBUG: Current user: $(whoami)"
-echo "DEBUG: Executing in 2 seconds..."
-sleep 2
-
-# Switch to clawdbot user with login shell
-exec sudo -i -u clawdbot
+# Check if running in interactive terminal
+if [ -t 0 ] && [ -t 1 ]; then
+    # Interactive mode - switch user directly
+    exec sudo -i -u clawdbot
+else
+    # Non-interactive mode (e.g., over SSH) - provide instructions
+    echo ""
+    echo -e "${GREEN}✅ Setup complete!${NC}"
+    echo ""
+    echo -e "${YELLOW}To complete configuration, switch to clawdbot user:${NC}"
+    echo ""
+    echo "    sudo -i -u clawdbot"
+    echo ""
+    echo "Or reconnect and the welcome message will appear automatically."
+    echo ""
+fi
