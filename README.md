@@ -122,10 +122,12 @@ Verify: `nmap -p- YOUR_SERVER_IP` should show only port 22 open.
 
 ## Documentation
 
-- [Security Architecture](docs/security.md)
-- [Technical Details](docs/architecture.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Agent Guidelines](AGENTS.md)
+- [Configuration Guide](docs/configuration.md) - All configuration options
+- [Development Mode](docs/development-mode.md) - Build from source
+- [Security Architecture](docs/security.md) - Security details
+- [Technical Details](docs/architecture.md) - Architecture overview
+- [Troubleshooting](docs/troubleshooting.md) - Common issues
+- [Agent Guidelines](AGENTS.md) - AI agent instructions
 
 ## Requirements
 
@@ -196,6 +198,82 @@ This will:
 - Run `pnpm install` and `pnpm build`
 - Symlink binary to `~/.local/bin/clawdbot`
 - Add development aliases to `.bashrc`
+
+## Configuration Options
+
+All configuration variables can be found in [`roles/clawdbot/defaults/main.yml`](roles/clawdbot/defaults/main.yml).
+
+You can override them in three ways:
+
+### 1. Via Command Line
+
+```bash
+ansible-playbook playbook.yml --ask-become-pass \
+  -e clawdbot_install_mode=development \
+  -e "clawdbot_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
+```
+
+### 2. Via Variables File
+
+```bash
+# Create vars.yml
+cat > vars.yml << EOF
+clawdbot_install_mode: development
+clawdbot_ssh_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxx user@host"
+  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB... user@host"
+clawdbot_repo_url: "https://github.com/YOUR_USERNAME/clawdbot.git"
+clawdbot_repo_branch: "feature-branch"
+tailscale_authkey: "tskey-auth-xxxxxxxxxxxxx"
+EOF
+
+# Use it
+ansible-playbook playbook.yml --ask-become-pass -e @vars.yml
+```
+
+### 3. Edit Defaults Directly
+
+Edit `roles/clawdbot/defaults/main.yml` before running the playbook.
+
+### Available Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `clawdbot_user` | `clawdbot` | System user name |
+| `clawdbot_home` | `/home/clawdbot` | User home directory |
+| `clawdbot_install_mode` | `release` | `release` or `development` |
+| `clawdbot_ssh_keys` | `[]` | List of SSH public keys |
+| `clawdbot_repo_url` | `https://github.com/clawdbot/clawdbot.git` | Git repository (dev mode) |
+| `clawdbot_repo_branch` | `main` | Git branch (dev mode) |
+| `tailscale_authkey` | `""` | Tailscale auth key for auto-connect |
+| `nodejs_version` | `22.x` | Node.js version to install |
+
+See [`roles/clawdbot/defaults/main.yml`](roles/clawdbot/defaults/main.yml) for the complete list.
+
+### Common Configuration Examples
+
+#### SSH Keys for Remote Access
+
+```bash
+ansible-playbook playbook.yml --ask-become-pass \
+  -e "clawdbot_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
+```
+
+#### Development Mode with Custom Repository
+
+```bash
+ansible-playbook playbook.yml --ask-become-pass \
+  -e clawdbot_install_mode=development \
+  -e clawdbot_repo_url=https://github.com/YOUR_USERNAME/clawdbot.git \
+  -e clawdbot_repo_branch=feature-branch
+```
+
+#### Tailscale Auto-Connect
+
+```bash
+ansible-playbook playbook.yml --ask-become-pass \
+  -e tailscale_authkey=tskey-auth-xxxxxxxxxxxxx
+```
 
 ## License
 

@@ -31,3 +31,11 @@ clawdbot_repo_url: "https://github.com/clawdbot/clawdbot.git"
 clawdbot_repo_branch: "main"
 clawdbot_code_dir: "{{ clawdbot_home }}/code"
 clawdbot_repo_dir: "{{ clawdbot_code_dir }}/clawdbot"
+
+# SSH keys for clawdbot user
+# Add your public SSH keys here to allow SSH access as clawdbot user
+# Example:
+#   clawdbot_ssh_keys:
+#     - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx user@host"
+#     - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDxxxxxxxxxxxxxxxxxxxxxxx user@host"
+clawdbot_ssh_keys: []
