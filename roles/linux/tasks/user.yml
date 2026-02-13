@@ -9,6 +9,19 @@
     home: /home/openclaw
     state: present
 
+- name: Configure .bashrc for openclaw user
+  ansible.builtin.blockinfile:
+    path: "{{ openclaw_home }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw config"
+    block: |
+      # Add pnpm to PATH
+      export PNPM_HOME="{{ openclaw_home }}/.local/share/pnpm"
+      export PATH="{{ openclaw_home }}/.local/bin:$PNPM_HOME:$PATH"
+    create: true
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
+    mode: '0644'
+
 - name: Add openclaw user to sudoers with scoped NOPASSWD
   ansible.builtin.copy:
     dest: /etc/sudoers.d/openclaw

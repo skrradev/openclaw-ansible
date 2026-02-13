@@ -9,6 +9,20 @@
     home: /Users/openclaw
     state: present
 
+- name: Configure .zshrc for openclaw user
+  ansible.builtin.blockinfile:
+    path: "{{ openclaw_home }}/.zshrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw config"
+    block: |
+      # Add Homebrew to PATH (macOS)
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      # Add pnpm to PATH
+      export PATH="{{ openclaw_home }}/.local/bin:$PATH"
+    create: true
+    owner: "{{ openclaw_user }}"
+    mode: '0644'
+
 - name: Set openclaw user as primary user for installation
   ansible.builtin.set_fact:
     openclaw_user: openclaw
