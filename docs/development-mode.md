@@ -42,8 +42,11 @@ cd openclaw-ansible
 # Install collections
 ansible-galaxy collection install -r requirements.yml
 
-# Run playbook with development mode
-ansible-playbook playbook.yml --ask-become-pass -e openclaw_install_mode=development
+# Run playbook with development mode (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass -e openclaw_install_mode=development
+
+# Or for macOS
+ansible-playbook playbook-macos.yml --ask-become-pass -e openclaw_install_mode=development
 ```
 
 ## What Gets Installed
@@ -203,7 +206,14 @@ openclaw_repo_dir: "/home/openclaw/code/openclaw"
 ### Using a Fork
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+# Linux
+ansible-playbook playbook-linux.yml --ask-become-pass \
+  -e openclaw_install_mode=development \
+  -e openclaw_repo_url=https://github.com/YOUR_USERNAME/openclaw.git \
+  -e openclaw_repo_branch=your-feature-branch
+
+# macOS
+ansible-playbook playbook-macos.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e openclaw_repo_url=https://github.com/YOUR_USERNAME/openclaw.git \
   -e openclaw_repo_branch=your-feature-branch
@@ -212,7 +222,8 @@ ansible-playbook playbook.yml --ask-become-pass \
 ### Custom Location
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+# Linux
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e openclaw_code_dir=/home/openclaw/projects
 ```
@@ -225,8 +236,8 @@ ansible-playbook playbook.yml --ask-become-pass \
 # Uninstall global package
 pnpm uninstall -g openclaw
 
-# Run ansible in development mode
-ansible-playbook playbook.yml --ask-become-pass -e openclaw_install_mode=development
+# Run ansible in development mode (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass -e openclaw_install_mode=development
 ```
 
 ### From Development to Release

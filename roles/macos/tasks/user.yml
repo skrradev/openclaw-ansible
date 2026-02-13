@@ -1,0 +1,32 @@
+---
+- name: Create openclaw system user
+  ansible.builtin.user:
+    name: openclaw
+    comment: "OpenClaw Service User"
+    system: true
+    shell: /bin/bash
+    create_home: true
+    home: /Users/openclaw
+    state: present
+
+- name: Set openclaw user as primary user for installation
+  ansible.builtin.set_fact:
+    openclaw_user: openclaw
+    openclaw_home: /Users/openclaw
+
+# SSH key configuration
+- name: Create .ssh directory for openclaw user
+  ansible.builtin.file:
+    path: "{{ openclaw_home }}/.ssh"
+    state: directory
+    owner: openclaw
+    mode: '0700'
+
+- name: Add SSH authorized keys for openclaw user
+  ansible.posix.authorized_key:
+    user: openclaw
+    state: present
+    key: "{{ item }}"
+  loop: "{{ openclaw_ssh_keys }}"
+  when: openclaw_ssh_keys | length > 0
+

@@ -1,0 +1,22 @@
+---
+# macOS Docker installation (Docker Desktop)
+
+- name: Check if Docker Desktop is installed
+  ansible.builtin.stat:
+    path: /Applications/Docker.app
+  register: docker_desktop
+
+- name: Install Docker Desktop via Homebrew Cask
+  community.general.homebrew_cask:
+    name: docker
+    state: present
+  environment:
+    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  when: not docker_desktop.stat.exists
+
+- name: Wait for Docker Desktop to be available
+  ansible.builtin.wait_for:
+    path: /var/run/docker.sock
+    timeout: 120
+  when: not docker_desktop.stat.exists
+

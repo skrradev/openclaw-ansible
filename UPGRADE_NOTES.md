@@ -3,15 +3,17 @@
 ## ✅ Completed Changes
 
 ### 1. Installation Modes (Release vs Development)
-- **File**: `roles/openclaw/defaults/main.yml`
+- **Files**: `roles/linux/defaults/main.yml`, `roles/macos/defaults/main.yml`
 - Added `openclaw_install_mode` variable (release | development)
 - Release mode: Install via `pnpm install -g openclaw@latest` (default)
 - Development mode: Clone repo, build, symlink binary
 - Development settings: repo URL, branch, code directory
 
-**Files Created**:
-- `roles/openclaw/tasks/openclaw-release.yml` - npm installation
-- `roles/openclaw/tasks/openclaw-development.yml` - git clone + build
+**Files Created** (in each role):
+- `roles/linux/tasks/openclaw-release.yml` - npm installation (Linux)
+- `roles/linux/tasks/openclaw-development.yml` - git clone + build (Linux)
+- `roles/macos/tasks/openclaw-release.yml` - npm installation (macOS)
+- `roles/macos/tasks/openclaw-development.yml` - git clone + build (macOS)
 - `docs/development-mode.md` - comprehensive guide
 
 **Development Mode Features**:
@@ -30,65 +32,57 @@
 ./run-playbook.sh -e openclaw_install_mode=development
 
 # With custom repo
-ansible-playbook playbook.yml --ask-become-pass \
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e openclaw_repo_url=https://github.com/YOUR_USERNAME/openclaw.git \
   -e openclaw_repo_branch=feature-branch
 ```
 
 ### 2. OS Detection & apt update/upgrade
-- **File**: `playbook.yml`
-- Added OS detection in pre_tasks (macOS, Debian/Ubuntu, RedHat)
-- Added `apt update && apt upgrade` at the beginning (Debian/Ubuntu only)
-- Detection variables: `is_macos`, `is_linux`, `is_debian`, `is_redhat`
+- **Files**: `playbook-linux.yml`, `playbook-macos.yml`
+- Separate playbooks per OS (replaces single `playbook.yml` with OS detection)
+- Linux playbook runs `apt update && apt upgrade` at the beginning (Debian/Ubuntu)
 
 ### 2. Homebrew Installation
-- **File**: `playbook.yml`
-- Homebrew is now installed for both Linux and macOS
-- Linux: `/home/linuxbrew/.linuxbrew/bin/brew`
+- **File**: `playbook-macos.yml`
+- Homebrew is installed on macOS
 - macOS: `/opt/homebrew/bin/brew`
 - Automatically added to PATH
 
 ### 3. OS-Specific System Tools
-- **Files**: 
-  - `roles/openclaw/tasks/system-tools.yml` (orchestrator)
-  - `roles/openclaw/tasks/system-tools-linux.yml` (apt-based)
-  - `roles/openclaw/tasks/system-tools-macos.yml` (brew-based)
+- **Files**:
+  - `roles/linux/tasks/system-tools.yml` (apt-based)
+  - `roles/macos/tasks/system-tools.yml` (brew-based)
+- Each role has direct task files (no dispatcher/orchestrator pattern)
 - Tools installed via appropriate package manager per OS
-- Homebrew shellenv integrated into .zshrc
+- Homebrew shellenv integrated into .zshrc (macOS)
 
 ### 4. OS-Specific Docker Installation
 - **Files**:
-  - `roles/openclaw/tasks/docker.yml` (orchestrator)
-  - `roles/openclaw/tasks/docker-linux.yml` (Docker CE)
-  - `roles/openclaw/tasks/docker-macos.yml` (Docker Desktop)
-- Linux: Docker CE via apt
-- macOS: Docker Desktop via Homebrew Cask
+  - `roles/linux/tasks/docker.yml` (Docker CE via apt)
+  - `roles/macos/tasks/docker.yml` (Docker Desktop via Homebrew Cask)
 
 ### 5. OS-Specific Firewall Configuration
 - **Files**:
-  - `roles/openclaw/tasks/firewall.yml` (orchestrator)
-  - `roles/openclaw/tasks/firewall-linux.yml` (UFW)
-  - `roles/openclaw/tasks/firewall-macos.yml` (Application Firewall)
-- Linux: UFW with Docker isolation
-- macOS: Application Firewall configuration
+  - `roles/linux/tasks/firewall.yml` (UFW with Docker isolation)
+  - `roles/macos/tasks/firewall.yml` (Application Firewall)
 
 ### 6. DBus & systemd User Service Fixes
-- **File**: `roles/openclaw/tasks/user.yml`
+- **File**: `roles/linux/tasks/user.yml`
 - Fixed: `loginctl enable-linger` for openclaw user
 - Fixed: XDG_RUNTIME_DIR set to `/run/user/$(id -u)`
 - Fixed: DBUS_SESSION_BUS_ADDRESS configuration in .bashrc
 - No more manual `eval $(dbus-launch --sh-syntax)` needed!
 
 ### 7. Systemd Service Template Enhancement
-- **File**: `roles/openclaw/templates/openclaw-host.service.j2`
+- **File**: `roles/linux/templates/openclaw-host.service.j2`
 - Added XDG_RUNTIME_DIR environment variable
 - Added DBUS_SESSION_BUS_ADDRESS
 - Added Homebrew to PATH
 - Enhanced security with ProtectSystem and ProtectHome
 
 ### 8. Clawdbot Installation via pnpm
-- **File**: `roles/openclaw/tasks/openclaw.yml`
+- **Files**: `roles/linux/tasks/openclaw.yml`, `roles/macos/tasks/openclaw.yml`
 - Changed from `pnpm add -g` to `pnpm install -g openclaw@latest`
 - Added verification step
 - Added version display
@@ -100,7 +94,7 @@ ansible-playbook playbook.yml --ask-become-pass \
 - Ensures proper login shell with .bashrc loaded
 
 ### 10. Enhanced Welcome Message
-- **File**: `playbook.yml` (post_tasks)
+- **Files**: `playbook-linux.yml` and `playbook-macos.yml` (post_tasks)
 - Recommends: `openclaw onboard --install-daemon` as first command
 - Shows environment status (XDG_RUNTIME_DIR, DBUS, Homebrew)
 - Provides both quick-start and manual setup paths
@@ -180,8 +174,8 @@ pnpm install -g openclaw@latest
 
 ### Linux (Debian/Ubuntu)
 ```bash
-# Test OS detection
-ansible-playbook playbook.yml --ask-become-pass --tags=never -vv
+# Test syntax
+ansible-playbook playbook-linux.yml --syntax-check
 
 # Test full installation
 ./run-playbook.sh
@@ -214,21 +208,24 @@ openclaw onboard --install-daemon
 ## 📚 Related Files
 
 ### Modified Files
-- `playbook.yml` - Main orchestration with OS detection
+- `playbook-linux.yml` - Linux playbook (replaces `playbook.yml`)
+- `playbook-macos.yml` - macOS playbook (replaces `playbook.yml`)
 - `install.sh` - Multi-OS detection
 - `run-playbook.sh` - Correct user switch command
 - `README.md` - Multi-OS documentation
-- `roles/openclaw/defaults/main.yml` - OS-specific variables
-- `roles/openclaw/tasks/*.yml` - OS-aware task orchestration
-- `roles/openclaw/templates/openclaw-host.service.j2` - Enhanced service
 
-### New Files Created
-- `roles/openclaw/tasks/system-tools-linux.yml`
-- `roles/openclaw/tasks/system-tools-macos.yml`
-- `roles/openclaw/tasks/docker-linux.yml`
-- `roles/openclaw/tasks/docker-macos.yml`
-- `roles/openclaw/tasks/firewall-linux.yml`
-- `roles/openclaw/tasks/firewall-macos.yml`
+### Role Structure
+- `roles/linux/` - Linux role (replaces `roles/openclaw/`)
+  - `defaults/main.yml` - Linux-specific variables
+  - `tasks/*.yml` - Linux task files (direct, no dispatcher pattern)
+  - `templates/daemon.json.j2` - Docker daemon config
+  - `templates/openclaw-host.service.j2` - Systemd service
+  - `handlers/main.yml` - Docker and fail2ban restart handlers
+- `roles/macos/` - macOS role (replaces `roles/openclaw/`)
+  - `defaults/main.yml` - macOS-specific variables
+  - `tasks/*.yml` - macOS task files (direct, no dispatcher pattern)
+  - `templates/openclaw-config.yml.j2` - OpenClaw config
+  - `handlers/main.yml` - macOS handlers
 - `UPGRADE_NOTES.md` (this file)
 
 ---

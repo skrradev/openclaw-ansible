@@ -9,16 +9,16 @@ Automated, hardened installation of [OpenClaw](https://github.com/openclaw/openc
 
 ## Features
 
-- 🔒 **Firewall-first**: UFW (Linux) + Application Firewall (macOS) + Docker isolation
-- 🛡️ **Fail2ban**: SSH brute-force protection out of the box
-- 🔄 **Auto-updates**: Automatic security patches via unattended-upgrades
-- 🔐 **Tailscale VPN**: Secure remote access without exposing services
-- 🍺 **Homebrew**: Package manager for both Linux and macOS
-- 🐳 **Docker**: Docker CE (Linux) / Docker Desktop (macOS)
-- 🌐 **Multi-OS Support**: Debian, Ubuntu, and macOS
-- 🚀 **One-command install**: Complete setup in minutes
-- 🔧 **Auto-configuration**: DBus, systemd, environment setup
-- 📦 **pnpm installation**: Uses `pnpm install -g openclaw@latest`
+- **Firewall-first**: UFW (Linux) + Application Firewall (macOS) + Docker isolation
+- **Fail2ban**: SSH brute-force protection out of the box
+- **Auto-updates**: Automatic security patches via unattended-upgrades
+- **Tailscale VPN**: Secure remote access without exposing services
+- **Homebrew**: Package manager for both Linux and macOS
+- **Docker**: Docker CE (Linux) / Docker Desktop (macOS)
+- **Multi-OS Support**: Debian, Ubuntu, and macOS
+- **One-command install**: Complete setup in minutes
+- **Auto-configuration**: DBus, systemd, environment setup
+- **pnpm installation**: Uses `pnpm install -g openclaw@latest`
 
 ## Quick Start
 
@@ -39,8 +39,8 @@ Install from source for development or testing:
 git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
 
-# Install in development mode
-ansible-playbook playbook.yml --ask-become-pass -e openclaw_install_mode=development
+# Install in development mode (auto-detects OS)
+./run-playbook.sh -e openclaw_install_mode=development
 ```
 
 ## What Gets Installed
@@ -115,7 +115,7 @@ Enable with: `-e openclaw_install_mode=development`
 ## Security
 
 - **Public ports**: SSH (22), Tailscale (41641/udp) only
-- **Fail2ban**: SSH brute-force protection (5 attempts → 1 hour ban)
+- **Fail2ban**: SSH brute-force protection (5 attempts -> 1 hour ban)
 - **Automatic updates**: Security patches via unattended-upgrades
 - **Docker isolation**: Containers can't expose ports externally (DOCKER-USER chain)
 - **Non-root**: OpenClaw runs as unprivileged user
@@ -131,9 +131,9 @@ For high-security environments, audit before running:
 ```bash
 git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
-# Review playbook.yml and roles/
-ansible-playbook playbook.yml --check --diff  # Dry run
-ansible-playbook playbook.yml --ask-become-pass
+# Review playbook-linux.yml and roles/linux/
+ansible-playbook playbook-linux.yml --check --diff  # Dry run
+ansible-playbook playbook-linux.yml --ask-become-pass
 ```
 
 ## Documentation
@@ -193,7 +193,7 @@ cd openclaw-ansible
 # Install Ansible collections
 ansible-galaxy collection install -r requirements.yml
 
-# Run installation
+# Run installation (auto-detects OS)
 ./run-playbook.sh
 ```
 
@@ -205,26 +205,31 @@ Build from source for development:
 # Same as above, but with development mode flag
 ./run-playbook.sh -e openclaw_install_mode=development
 
-# Or directly:
-ansible-playbook playbook.yml --ask-become-pass -e openclaw_install_mode=development
+# Or directly (Linux):
+ansible-playbook playbook-linux.yml --ask-become-pass -e openclaw_install_mode=development
+
+# Or directly (macOS):
+ansible-playbook playbook-macos.yml --ask-become-pass -e openclaw_install_mode=development
 ```
 
 This will:
 - Clone openclaw repo to `~/code/openclaw`
 - Run `pnpm install` and `pnpm build`
 - Symlink binary to `~/.local/bin/openclaw`
-- Add development aliases to `.bashrc`
+- Add development aliases to shell config
 
 ## Configuration Options
 
-All configuration variables can be found in [`roles/openclaw/defaults/main.yml`](roles/openclaw/defaults/main.yml).
+All configuration variables can be found in the role defaults:
+- Linux: [`roles/linux/defaults/main.yml`](roles/linux/defaults/main.yml)
+- macOS: [`roles/macos/defaults/main.yml`](roles/macos/defaults/main.yml)
 
 You can override them in three ways:
 
 ### 1. Via Command Line
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+./run-playbook.sh \
   -e openclaw_install_mode=development \
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
 ```
@@ -243,42 +248,40 @@ openclaw_repo_branch: "feature-branch"
 tailscale_authkey: "tskey-auth-xxxxxxxxxxxxx"
 EOF
 
-# Use it
-ansible-playbook playbook.yml --ask-become-pass -e @vars.yml
+# Use it (auto-detects OS)
+./run-playbook.sh -e @vars.yml
 ```
 
 ### 3. Edit Defaults Directly
 
-Edit `roles/openclaw/defaults/main.yml` before running the playbook.
+Edit the role defaults before running the playbook.
 
 ### Available Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `openclaw_user` | `openclaw` | System user name |
-| `openclaw_home` | `/home/openclaw` | User home directory |
+| `openclaw_home` | `/home/openclaw` (Linux) / `/Users/openclaw` (macOS) | User home directory |
 | `openclaw_install_mode` | `release` | `release` or `development` |
 | `openclaw_ssh_keys` | `[]` | List of SSH public keys |
 | `openclaw_repo_url` | `https://github.com/openclaw/openclaw.git` | Git repository (dev mode) |
 | `openclaw_repo_branch` | `main` | Git branch (dev mode) |
 | `tailscale_authkey` | `""` | Tailscale auth key for auto-connect |
-| `nodejs_version` | `22.x` | Node.js version to install |
-
-See [`roles/openclaw/defaults/main.yml`](roles/openclaw/defaults/main.yml) for the complete list.
+| `nodejs_version` | `22.x` (Linux) / `22` (macOS) | Node.js version to install |
 
 ### Common Configuration Examples
 
 #### SSH Keys for Remote Access
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+./run-playbook.sh \
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
 ```
 
 #### Development Mode with Custom Repository
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+./run-playbook.sh \
   -e openclaw_install_mode=development \
   -e openclaw_repo_url=https://github.com/YOUR_USERNAME/openclaw.git \
   -e openclaw_repo_branch=feature-branch
@@ -287,7 +290,7 @@ ansible-playbook playbook.yml --ask-become-pass \
 #### Tailscale Auto-Connect
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+./run-playbook.sh \
   -e tailscale_authkey=tskey-auth-xxxxxxxxxxxxx
 ```
 

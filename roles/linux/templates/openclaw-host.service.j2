@@ -10,7 +10,7 @@ Group={{ openclaw_user }}
 WorkingDirectory={{ openclaw_home }}
 
 # Environment variables
-Environment="PATH={{ openclaw_home }}/.local/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PATH={{ openclaw_home }}/.local/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="PNPM_HOME={{ openclaw_home }}/.local/share/pnpm"
 Environment="HOME={{ openclaw_home }}"
 Environment="XDG_RUNTIME_DIR=/run/user/{{ openclaw_uid_value | default('1000') }}"

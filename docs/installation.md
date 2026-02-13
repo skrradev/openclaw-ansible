@@ -29,8 +29,11 @@ cd openclaw-ansible
 # Install Ansible collections
 ansible-galaxy collection install -r requirements.yml
 
-# Run playbook
-ansible-playbook playbook.yml --ask-become-pass
+# Run playbook (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass
+
+# Or for macOS
+ansible-playbook playbook-macos.yml --ask-become-pass
 ```
 
 ## Post-Installation
@@ -251,7 +254,7 @@ volumes:
 
 ```bash
 # Set Tailscale auth key in playbook vars
-ansible-playbook playbook.yml \
+ansible-playbook playbook-linux.yml \
   --ask-become-pass \
   -e "tailscale_authkey=tskey-auth-xxxxx"
 ```
@@ -262,7 +265,7 @@ ansible-playbook playbook.yml \
 # Example GitHub Actions
 - name: Deploy OpenClaw
   run: |
-    ansible-playbook playbook.yml \
+    ansible-playbook playbook-linux.yml \
       -e "tailscale_authkey=${{ secrets.TAILSCALE_KEY }}" \
       --become
 ```

@@ -176,7 +176,7 @@ Container → NAT → Internet (outbound allowed)
 ### Installation Script
 - The `curl | bash` installation pattern has inherent risks
 - For high-security environments, clone the repository and audit before running
-- Consider using `--check` mode first: `ansible-playbook playbook.yml --check`
+- Consider using `--check` mode first: `ansible-playbook playbook-linux.yml --check`
 
 ## Security Checklist
 

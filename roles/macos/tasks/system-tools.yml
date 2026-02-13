@@ -1,0 +1,37 @@
+---
+# macOS system tools installation (Homebrew-based)
+
+- name: Install essential system tools via Homebrew
+  community.general.homebrew:
+    name:
+      - git
+      - git-lfs
+      - curl
+      - jq
+      - unzip
+    state: present
+  environment:
+    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+
+- name: Configure .zshrc for openclaw user
+  ansible.builtin.blockinfile:
+    path: "{{ openclaw_home }}/.zshrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw config"
+    block: |
+      # Add Homebrew to PATH (macOS)
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      # Add pnpm to PATH
+      export PATH="{{ openclaw_home }}/.local/bin:$PATH"
+    create: true
+    owner: "{{ openclaw_user }}"
+    mode: '0644'
+
+- name: Configure git defaults
+  community.general.git_config:
+    name: "{{ item.name }}"
+    scope: global
+    value: "{{ item.value }}"
+  loop:
+    - { name: 'init.defaultBranch', value: 'main' }
+    - { name: 'pull.rebase', value: 'false' }

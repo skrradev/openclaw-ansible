@@ -1,0 +1,16 @@
+---
+# macOS Tailscale installation (Homebrew Cask)
+
+- name: Check if Tailscale is already installed
+  ansible.builtin.stat:
+    path: /Applications/Tailscale.app
+  register: tailscale_app
+
+- name: Install Tailscale via Homebrew Cask
+  community.general.homebrew_cask:
+    name: tailscale
+    state: present
+  environment:
+    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  when: not tailscale_app.stat.exists
+

@@ -1,0 +1,24 @@
+---
+# macOS Node.js installation via Homebrew
+
+- name: Install Node.js via Homebrew
+  community.general.homebrew:
+    name: "node@{{ nodejs_version }}"
+    state: present
+  environment:
+    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+
+- name: Link Node.js into Homebrew prefix
+  ansible.builtin.command: brew link --overwrite node@{{ nodejs_version }}
+  environment:
+    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  changed_when: false
+  failed_when: false
+
+- name: Install pnpm globally
+  ansible.builtin.command: npm install -g pnpm
+  environment:
+    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+  args:
+    creates: /opt/homebrew/bin/pnpm
+

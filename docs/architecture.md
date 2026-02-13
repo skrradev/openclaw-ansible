@@ -61,33 +61,40 @@ OpenClaw runs as a systemd service that manages the Docker container:
 systemd → docker compose → openclaw container
 ```
 
-## Installation Flow
+## Installation Flow (Linux)
 
-1. **Tailscale Setup** (`tailscale.yml`)
+> The project uses separate playbooks and roles per OS:
+> - **Linux**: `playbook-linux.yml` with `roles/linux/`
+> - **macOS**: `playbook-macos.yml` with `roles/macos/`
+
+1. **System Tools** (`roles/linux/tasks/system-tools.yml`)
+   - Install apt packages, oh-my-zsh, git config
+
+2. **Tailscale Setup** (`roles/linux/tasks/tailscale.yml`)
    - Add Tailscale repository
    - Install Tailscale package
    - Display connection instructions
 
-2. **User Creation** (`user.yml`)
+3. **User Creation** (`roles/linux/tasks/user.yml`)
    - Create `openclaw` system user
 
-3. **Docker Installation** (`docker.yml`)
+4. **Docker Installation** (`roles/linux/tasks/docker.yml`)
    - Install Docker CE + Compose V2
    - Add user to docker group
    - Create `/etc/docker` directory
 
-4. **Firewall Setup** (`firewall.yml`)
+5. **Firewall Setup** (`roles/linux/tasks/firewall.yml`)
    - Install UFW
    - Configure DOCKER-USER chain
    - Configure Docker daemon (`/etc/docker/daemon.json`)
    - Allow SSH (22/tcp) and Tailscale (41641/udp)
 
-5. **Node.js Installation** (`nodejs.yml`)
+6. **Node.js Installation** (`roles/linux/tasks/nodejs.yml`)
    - Add NodeSource repository
    - Install Node.js 22.x
    - Install pnpm globally
 
-6. **OpenClaw Setup** (`openclaw.yml`)
+7. **OpenClaw Setup** (`roles/linux/tasks/openclaw.yml`)
    - Create directories
    - Generate configs from templates
    - Build Docker image
@@ -115,10 +122,11 @@ Defense in depth. Even if DOCKER-USER fails, localhost binding prevents external
 
 Principle of least privilege. If container is compromised, attacker has limited privileges.
 
-## Ansible Task Order
+## Ansible Task Order (Linux)
 
 ```
-main.yml
+roles/linux/tasks/main.yml
+├── system-tools.yml (apt packages, oh-my-zsh, git config)
 ├── tailscale.yml (VPN setup)
 ├── user.yml (create openclaw user)
 ├── docker.yml (install Docker, create /etc/docker)
@@ -130,3 +138,16 @@ main.yml
 Order matters: Docker must be installed before firewall configuration because:
 1. `/etc/docker` directory must exist for `daemon.json`
 2. Docker service must exist to be restarted after config changes
+
+## Ansible Task Order (macOS)
+
+```
+roles/macos/tasks/main.yml
+├── system-tools.yml (brew packages, oh-my-zsh, git config)
+├── tailscale.yml (VPN setup)
+├── user.yml (create openclaw user)
+├── docker.yml (Docker Desktop via Homebrew)
+├── firewall.yml (Application Firewall)
+├── nodejs.yml (Node.js + pnpm)
+└── openclaw.yml (container setup)
+```

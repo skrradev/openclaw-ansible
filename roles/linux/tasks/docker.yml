@@ -1,5 +1,5 @@
 ---
-# Linux-specific Docker installation (apt-based)
+# Linux Docker installation (apt-based)
 
 - name: Install required system packages for Docker
   ansible.builtin.apt:

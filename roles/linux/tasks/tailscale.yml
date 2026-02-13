@@ -1,5 +1,5 @@
 ---
-# Linux-specific Tailscale installation (Debian/Ubuntu)
+# Linux Tailscale installation (Debian/Ubuntu)
 
 - name: Add Tailscale GPG key
   ansible.builtin.shell:
@@ -32,30 +32,9 @@
     name: tailscale
     state: present
 
-- name: Enable Tailscale service (Linux)
+- name: Enable Tailscale service
   ansible.builtin.systemd:
     name: tailscaled
     enabled: true
     state: started
 
-- name: Check if Tailscale is already connected (Linux)
-  ansible.builtin.command: tailscale status --json
-  register: tailscale_status_linux
-  changed_when: false
-  failed_when: false
-
-- name: Display Tailscale auth URL if not connected (Linux)
-  ansible.builtin.debug:
-    msg:
-      - "============================================"
-      - "Tailscale installed but not connected yet"
-      - "============================================"
-      - ""
-      - "To connect this machine to your Tailnet:"
-      - "Run: sudo tailscale up"
-      - ""
-      - "For unattended installation, use an auth key:"
-      - "sudo tailscale up --authkey tskey-auth-xxxxx"
-      - ""
-      - "Get auth key from: https://login.tailscale.com/admin/settings/keys"
-  when: tailscale_status_linux.rc != 0

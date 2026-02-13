@@ -1,0 +1,35 @@
+---
+# Linux system tools installation (apt-based)
+
+- name: Install essential system tools
+  ansible.builtin.apt:
+    name:
+      - git
+      - git-lfs
+      - curl
+      - jq
+      - unzip
+    state: present
+    update_cache: true
+
+- name: Configure .bashrc for openclaw user
+  ansible.builtin.blockinfile:
+    path: "{{ openclaw_home }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw config"
+    block: |
+      # Add pnpm to PATH
+      export PNPM_HOME="{{ openclaw_home }}/.local/share/pnpm"
+      export PATH="{{ openclaw_home }}/.local/bin:$PNPM_HOME:$PATH"
+    create: true
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
+    mode: '0644'
+
+- name: Configure git defaults
+  community.general.git_config:
+    name: "{{ item.name }}"
+    scope: global
+    value: "{{ item.value }}"
+  loop:
+    - { name: 'init.defaultBranch', value: 'main' }
+    - { name: 'pull.rebase', value: 'false' }

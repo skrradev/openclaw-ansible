@@ -129,8 +129,11 @@ ansible-galaxy collection install -r requirements.yml
 
 **Permission denied**:
 ```bash
-# Run with --ask-become-pass
-ansible-playbook playbook.yml --ask-become-pass
+# Run with --ask-become-pass (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass
+
+# Or for macOS
+ansible-playbook playbook-macos.yml --ask-become-pass
 ```
 
 **Docker daemon not running**:

@@ -5,7 +5,8 @@ This guide explains all available configuration options for the OpenClaw Ansible
 ## Configuration File
 
 All default variables are defined in:
-**[`roles/openclaw/defaults/main.yml`](../roles/openclaw/defaults/main.yml)**
+- **Linux**: [`roles/linux/defaults/main.yml`](../roles/linux/defaults/main.yml)
+- **macOS**: [`roles/macos/defaults/main.yml`](../roles/macos/defaults/main.yml)
 
 ## How to Configure
 
@@ -14,7 +15,13 @@ All default variables are defined in:
 Pass variables directly via `-e` flag:
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+# Linux
+ansible-playbook playbook-linux.yml --ask-become-pass \
+  -e openclaw_install_mode=development \
+  -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
+
+# macOS
+ansible-playbook playbook-macos.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
 ```
@@ -38,12 +45,16 @@ nodejs_version: "22.x"
 Then use it:
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass -e @vars.yml
+# Linux
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
+
+# macOS
+ansible-playbook playbook-macos.yml --ask-become-pass -e @vars.yml
 ```
 
 ### Method 3: Edit Defaults
 
-Directly edit `roles/openclaw/defaults/main.yml` before running the playbook.
+Directly edit `roles/linux/defaults/main.yml` or `roles/macos/defaults/main.yml` before running the playbook.
 
 **Note**: This is not recommended for version control, use variables files instead.
 
@@ -207,7 +218,7 @@ openclaw_ssh_keys:
 ```
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass -e @vars.yml
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
 ```
 
 ### Development Setup
@@ -222,7 +233,7 @@ openclaw_ssh_keys:
 ```
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass -e @vars-dev.yml
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars-dev.yml
 ```
 
 ### Production Setup with Tailscale
@@ -237,7 +248,7 @@ nodejs_version: "22.x"
 ```
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass -e @vars-prod.yml
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars-prod.yml
 ```
 
 ### Custom User and Directories
@@ -251,7 +262,7 @@ openclaw_code_dir: /opt/mybot/repositories
 ```
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass -e @vars-custom.yml
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars-custom.yml
 ```
 
 ### Testing Different Branches
@@ -265,7 +276,7 @@ openclaw_ssh_keys:
 ```
 
 ```bash
-ansible-playbook playbook.yml --ask-become-pass -e @vars-testing.yml
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars-testing.yml
 ```
 
 ## Environment-Specific Configurations
@@ -319,7 +330,7 @@ nodejs_version: "22.x"
 
 3. **Rotate keys regularly**: Update SSH keys periodically
    ```bash
-   ansible-playbook playbook.yml --ask-become-pass \
+   ansible-playbook playbook-linux.yml --ask-become-pass \
      -e "openclaw_ssh_keys=['$(cat ~/.ssh/new_key.pub)']"
    ```
 
@@ -332,7 +343,7 @@ nodejs_version: "22.x"
    ```bash
    # Use environment variable
    export TAILSCALE_AUTHKEY=$(vault read -field=key secret/tailscale)
-   ansible-playbook playbook.yml --ask-become-pass \
+   ansible-playbook playbook-linux.yml --ask-become-pass \
      -e tailscale_authkey="$TAILSCALE_AUTHKEY"
    ```
 
@@ -356,7 +367,7 @@ Create encrypted vault:
 ansible-vault create secrets.yml
 # Add: vault_tailscale_authkey: tskey-auth-xxxxx
 
-ansible-playbook playbook.yml --ask-become-pass \
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e @secrets.yml --ask-vault-pass
 ```
 
@@ -365,12 +376,12 @@ ansible-playbook playbook.yml --ask-become-pass \
 After configuration, verify settings:
 
 ```bash
-# Check what variables will be used
-ansible-playbook playbook.yml --ask-become-pass \
+# Check what variables will be used (Linux example)
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e @vars.yml --check --diff
 
-# View all variables
-ansible-playbook playbook.yml --ask-become-pass \
+# View all variables (Linux example)
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e @vars.yml -e "ansible_check_mode=true" \
   --tags never -vv
 ```
@@ -396,7 +407,7 @@ sudo tailscale up --authkey=YOUR_KEY --verbose
 
 Check which mode is active:
 ```bash
-ansible-playbook playbook.yml --ask-become-pass \
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e @vars.yml --check | grep "install_mode"
 ```
 
@@ -405,4 +416,5 @@ ansible-playbook playbook.yml --ask-become-pass \
 - [Main README](../README.md)
 - [Development Mode Guide](development-mode.md)
 - [Upgrade Notes](../UPGRADE_NOTES.md)
-- [Defaults File](../roles/openclaw/defaults/main.yml)
+- [Linux Defaults](../roles/linux/defaults/main.yml)
+- [macOS Defaults](../roles/macos/defaults/main.yml)

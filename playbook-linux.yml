@@ -1,0 +1,43 @@
+---
+- name: Install OpenClaw on Linux (Debian/Ubuntu)
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  pre_tasks:
+    - name: Update apt cache and upgrade all packages
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+        cache_valid_time: 3600
+      ignore_errors: true
+
+    - name: Install ACL for privilege escalation
+      ansible.builtin.package:
+        name: acl
+        state: present
+
+    - name: Check if running as root
+      ansible.builtin.command: id -u
+      register: user_id
+      changed_when: false
+      become: false
+
+    - name: Set fact for root user
+      ansible.builtin.set_fact:
+        is_root: "{{ user_id.stdout == '0' }}"
+
+    - name: Install Ansible collections
+      ansible.builtin.command: ansible-galaxy collection install -r requirements.yml
+      args:
+        chdir: "{{ playbook_dir }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      changed_when: false
+
+  roles:
+    - linux

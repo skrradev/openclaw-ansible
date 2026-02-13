@@ -47,18 +47,3 @@
   args:
     creates: /usr/local/bin/pnpm
 
-- name: Verify Node.js installation
-  ansible.builtin.command: node --version
-  register: node_version
-  changed_when: false
-
-- name: Verify pnpm installation
-  ansible.builtin.command: pnpm --version
-  register: pnpm_version
-  changed_when: false
-
-- name: Display Node.js and pnpm versions
-  ansible.builtin.debug:
-    msg:
-      - "Node.js version: {{ node_version.stdout }}"
-      - "pnpm version: {{ pnpm_version.stdout }}"

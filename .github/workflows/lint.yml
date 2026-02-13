@@ -45,8 +45,11 @@ jobs:
       - name: Install Ansible collections
         run: ansible-galaxy collection install -r requirements.yml
 
-      - name: Run ansible-lint
-        run: ansible-lint playbook.yml
+      - name: Run ansible-lint (Linux playbook)
+        run: ansible-lint playbook-linux.yml
+
+      - name: Run ansible-lint (macOS playbook)
+        run: ansible-lint playbook-macos.yml
 
   syntax-check:
     name: Ansible Syntax Check
@@ -66,5 +69,8 @@ jobs:
       - name: Install Ansible collections
         run: ansible-galaxy collection install -r requirements.yml
 
-      - name: Ansible syntax check
-        run: ansible-playbook playbook.yml --syntax-check
+      - name: Ansible syntax check (Linux)
+        run: ansible-playbook playbook-linux.yml --syntax-check
+
+      - name: Ansible syntax check (macOS)
+        run: ansible-playbook playbook-macos.yml --syntax-check

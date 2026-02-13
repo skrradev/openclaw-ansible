@@ -1,5 +1,5 @@
 ---
-# OpenClaw default variables
+# OpenClaw default variables (Linux)
 
 # Tailscale settings
 tailscale_authkey: ""  # Optional: set to auto-connect during installation
@@ -17,9 +17,8 @@ openclaw_config_dir: "{{ openclaw_home }}/.openclaw"
 openclaw_user: openclaw
 openclaw_home: /home/openclaw
 
-# OS-specific settings (set dynamically in tasks)
-homebrew_prefix: "{{ '/opt/homebrew' if ansible_os_family == 'Darwin' else '/home/linuxbrew/.linuxbrew' }}"
-package_manager: "{{ 'brew' if ansible_os_family == 'Darwin' else 'apt' }}"
+# Linux-specific settings
+package_manager: apt
 
 # Installation mode: 'release' or 'development'
 # release: Install via pnpm install -g openclaw@latest

@@ -13,7 +13,6 @@ if [ -z "$COLORTERM" ]; then
 fi
 
 REPO_URL="https://raw.githubusercontent.com/openclaw/openclaw-ansible/main"
-PLAYBOOK_URL="${REPO_URL}/playbook.yml"
 TEMP_DIR=$(mktemp -d)
 
 # Colors (with 256-color support)
@@ -30,12 +29,14 @@ echo -e "${GREEN}║   OpenClaw Ansible Installer           ║${NC}"
 echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
 echo ""
 
-# Detect operating system
+# Detect operating system and select playbook
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS_TYPE="macos"
+    PLAYBOOK="playbook-macos.yml"
     echo -e "${GREEN}Detected: macOS${NC}"
 elif command -v apt-get &> /dev/null; then
     OS_TYPE="linux"
+    PLAYBOOK="playbook-linux.yml"
     echo -e "${GREEN}Detected: Debian/Ubuntu Linux${NC}"
 else
     echo -e "${RED}Error: Unsupported operating system.${NC}"
@@ -62,11 +63,23 @@ echo -e "${GREEN}[1/4] Checking prerequisites...${NC}"
 # Check if Ansible is installed
 if ! command -v ansible-playbook &> /dev/null; then
     echo -e "${YELLOW}Ansible not found. Installing...${NC}"
-    $SUDO apt-get update -qq
-    $SUDO apt-get install -y ansible
-    echo -e "${GREEN}✓ Ansible installed${NC}"
+    if [ "$OS_TYPE" = "linux" ]; then
+        $SUDO apt-get update -qq
+        $SUDO apt-get install -y ansible
+    else
+        # macOS: install via pip or brew
+        if command -v brew &> /dev/null; then
+            brew install ansible
+        else
+            echo -e "${YELLOW}Installing Homebrew first...${NC}"
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+            brew install ansible
+        fi
+    fi
+    echo -e "${GREEN}Ansible installed${NC}"
 else
-    echo -e "${GREEN}✓ Ansible already installed${NC}"
+    echo -e "${GREEN}Ansible already installed${NC}"
 fi
 
 echo -e "${GREEN}[2/5] Downloading playbook...${NC}"
@@ -79,12 +92,12 @@ echo "Cloning repository..."
 git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
 
-echo -e "${GREEN}✓ Playbook downloaded${NC}"
+echo -e "${GREEN}Playbook downloaded${NC}"
 
 echo -e "${GREEN}[3/5] Installing Ansible collections...${NC}"
 ansible-galaxy collection install -r requirements.yml
 
-echo -e "${GREEN}[4/5] Running Ansible playbook...${NC}"
+echo -e "${GREEN}[4/5] Running Ansible playbook (${PLAYBOOK})...${NC}"
 if [ "$EUID" -ne 0 ]; then
     echo -e "${YELLOW}You will be prompted for your sudo password.${NC}"
 fi
