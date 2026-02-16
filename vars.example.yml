@@ -10,11 +10,17 @@ openclaw_ssh_keys:
   - "ssh-ed25519 AAAA... replace-with-your-openclaw-key"
 
 # Linux admin model
-# Cloud images (AWS/GCP): leave admin_user empty and set existing_admin_user.
-# Bare metal: set admin_user/admin_ssh_keys and clear existing_admin_user.
+# Set the admin account used by strict SSH checks.
+# Cloud images (AWS/GCP): usually ubuntu/debian/ec2-user.
+# Bare metal: set this to the admin account you created.
+ssh_admin_user: "ubuntu"
+
+# Optional bootstrap admin creation (bare metal)
 admin_user: ""
 admin_ssh_keys: []
-existing_admin_user: "ubuntu"
+
+# Legacy fallback (prefer ssh_admin_user)
+existing_admin_user: ""
 
 # Optional
 tailscale_authkey: ""

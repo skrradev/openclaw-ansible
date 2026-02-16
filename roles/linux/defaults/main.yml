@@ -45,6 +45,10 @@ openclaw_ssh_keys: []
 admin_user: ""
 admin_ssh_keys: []
 
+# Canonical admin account for strict SSH hardening preflight (recommended)
+# Example: ubuntu (AWS/GCP Ubuntu), debian (GCP Debian), adminops (bare metal)
+ssh_admin_user: ""
+
+# Backward compatibility for previous config style (prefer ssh_admin_user)
 # Existing admin user (cloud images) for strict SSH hardening preflight
-# Example: ubuntu (AWS/GCP Ubuntu), debian (GCP Debian)
 existing_admin_user: ""

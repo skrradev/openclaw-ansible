@@ -181,7 +181,7 @@ For cloud images (AWS/GCP), do not create a new admin user. Set:
 ```yaml
 admin_user: ""
 admin_ssh_keys: []
-existing_admin_user: "ubuntu"  # or debian, based on image
+ssh_admin_user: "ubuntu"  # or debian/ec2-user, based on image
 ```
 
 ## Documentation
@@ -288,7 +288,7 @@ ansible-playbook playbook-linux.yml --ask-become-pass \
 
 # Linux: strict SSH hardening for cloud default user
 ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass \
-  -e existing_admin_user=ubuntu
+  -e ssh_admin_user=ubuntu
 ```
 
 ### 2. Via Variables File
@@ -307,7 +307,7 @@ ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
 ansible-playbook playbook-macos.yml --ask-become-pass -e @vars.yml
 ```
 
-`vars.example.yml` includes cloud defaults (`existing_admin_user`) and notes for bare-metal admin bootstrap.
+`vars.example.yml` includes cloud defaults (`ssh_admin_user`) and notes for bare-metal admin bootstrap.
 
 ### 3. Edit Defaults Directly
 
@@ -323,7 +323,8 @@ Edit the role defaults before running the playbook.
 | `openclaw_ssh_keys` | `[]` | List of SSH public keys |
 | `admin_user` | `""` | Optional admin user to create (bare metal, includes NOPASSWD sudoers drop-in) |
 | `admin_ssh_keys` | `[]` | SSH public keys for `admin_user` |
-| `existing_admin_user` | `""` | Existing cloud admin user for strict SSH checks |
+| `ssh_admin_user` | `""` | Canonical admin user for strict SSH checks |
+| `existing_admin_user` | `""` | Legacy fallback for strict SSH checks (prefer `ssh_admin_user`) |
 | `openclaw_repo_url` | `https://github.com/openclaw/openclaw.git` | Git repository (dev mode) |
 | `openclaw_repo_branch` | `main` | Git branch (dev mode) |
 | `tailscale_authkey` | `""` | Tailscale auth key for auto-connect |

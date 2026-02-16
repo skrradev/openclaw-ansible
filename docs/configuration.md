@@ -26,7 +26,7 @@ ansible-playbook playbook-linux.yml --ask-become-pass \
 
 # Linux (cloud): strict hardening with existing image admin user
 ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass \
-  -e existing_admin_user=ubuntu
+  -e ssh_admin_user=ubuntu
 
 # macOS
 ansible-playbook playbook-macos.yml --ask-become-pass \
@@ -132,10 +132,19 @@ Directly edit `roles/linux/defaults/main.yml` or `roles/macos/defaults/main.yml`
 #### `existing_admin_user` (Linux only)
 - **Type**: String
 - **Default**: `""` (empty)
-- **Description**: Existing cloud admin user used by strict SSH preflight (for AWS/GCP images)
+- **Description**: Legacy fallback for strict SSH preflight (prefer `ssh_admin_user`)
 - **Example**:
   ```bash
   -e existing_admin_user=ubuntu
+  ```
+
+#### `ssh_admin_user` (Linux only)
+- **Type**: String
+- **Default**: `""` (empty)
+- **Description**: Canonical admin user used by strict SSH preflight (cloud or bare metal)
+- **Example**:
+  ```bash
+  -e ssh_admin_user=ubuntu
   ```
 
 ### Installation Mode

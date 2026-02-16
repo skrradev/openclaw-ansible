@@ -2,18 +2,20 @@
 # Strict SSH hardening (key-only, no root login).
 # Run this after confirming non-root admin key access works.
 
+- name: Calculate strict SSH admin user
+  ansible.builtin.set_fact:
+    strict_ssh_admin_user: >-
+      {{ ssh_admin_user if ssh_admin_user | default('') | length > 0 else
+         (admin_user if admin_user | default('') | length > 0 else existing_admin_user) }}
+
 - name: Assert strict SSH hardening prerequisites
   ansible.builtin.assert:
     that:
-      - (admin_user | length > 0 and admin_ssh_keys | length > 0) or (existing_admin_user | length > 0)
+      - strict_ssh_admin_user | length > 0
     fail_msg: >-
-      Strict SSH hardening requires either admin_user + admin_ssh_keys (bare metal)
-      or existing_admin_user (cloud images like AWS/GCP).
+      Strict SSH hardening requires ssh_admin_user (recommended), or a fallback
+      value via admin_user / existing_admin_user.
     quiet: true
-
-- name: Select strict SSH admin user
-  ansible.builtin.set_fact:
-    strict_ssh_admin_user: "{{ admin_user if (admin_user | length > 0 and admin_ssh_keys | length > 0) else existing_admin_user }}"
 
 - name: Assert strict SSH admin user is non-root
   ansible.builtin.assert:
