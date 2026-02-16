@@ -19,6 +19,7 @@ openclaw_home: /home/openclaw
 
 # Linux-specific settings
 package_manager: apt
+homebrew_prefix: /home/linuxbrew/.linuxbrew
 
 # Installation mode: 'release' or 'development'
 # release: Install via pnpm install -g openclaw@latest

@@ -14,6 +14,9 @@
     path: "{{ openclaw_home }}/.bashrc"
     marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw config"
     block: |
+      # Add Homebrew (Linuxbrew) to PATH
+      eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
+
       # Add pnpm to PATH
       export PNPM_HOME="{{ openclaw_home }}/.local/share/pnpm"
       export PATH="{{ openclaw_home }}/.local/bin:$PNPM_HOME:$PATH"

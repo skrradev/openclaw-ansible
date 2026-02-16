@@ -21,6 +21,29 @@
         state: present
 
 
+    - name: Install build-essential for Homebrew
+      ansible.builtin.apt:
+        name:
+          - build-essential
+        state: present
+
+    - name: Check if Homebrew (Linuxbrew) is installed
+      ansible.builtin.stat:
+        path: /home/linuxbrew/.linuxbrew/bin/brew
+      register: homebrew_check
+
+    - name: Install Homebrew (Linuxbrew)
+      ansible.builtin.shell: |
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      args:
+        creates: /home/linuxbrew/.linuxbrew/bin/brew
+      when: not homebrew_check.stat.exists
+      become: false
+
+    - name: Add Homebrew to PATH for current session
+      ansible.builtin.set_fact:
+        ansible_env: "{{ ansible_env | combine({'PATH': '/home/linuxbrew/.linuxbrew/bin:' + (ansible_env.PATH | default(lookup('env', 'PATH')))}) }}"
+
     - name: Install Ansible collections
       ansible.builtin.command: ansible-galaxy collection install -r requirements.yml
       args:
