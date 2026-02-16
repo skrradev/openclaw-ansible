@@ -7,7 +7,7 @@ description: Firewall configuration, Docker isolation, and security hardening de
 
 ## Overview
 
-This playbook implements a multi-layer defense strategy to secure Clawdbot installations.
+This playbook implements a multi-layer defense strategy to secure OpenClaw installations.
 
 ## Security Layers
 
@@ -71,24 +71,23 @@ Container processes run as unprivileged `openclaw` user.
 
 ### Layer 6: Systemd Hardening
 
-The clawdbot service runs with security restrictions:
+The openclaw service runs with security restrictions:
 
 - `NoNewPrivileges=true` - Prevents privilege escalation
 - `PrivateTmp=true` - Isolated /tmp directory
 - `ProtectSystem=strict` - Read-only system directories
 - `ProtectHome=read-only` - Limited home directory access
-- `ReadWritePaths` - Only ~/.clawdbot is writable
+- `ReadWritePaths` - Only required OpenClaw paths are writable
 
 ### Layer 7: Scoped Sudo Access
 
-The clawdbot user has limited sudo permissions (not full root):
+The openclaw user has limited sudo permissions (not full root):
 
 ```bash
 # Allowed commands only:
-- systemctl start/stop/restart/status clawdbot
-- systemctl daemon-reload
+- systemctl start/stop/restart/status/enable/disable openclaw
 - tailscale commands
-- journalctl for clawdbot logs
+- journalctl for openclaw logs
 ```
 
 ### Layer 8: Automatic Security Updates
@@ -152,7 +151,8 @@ OpenClaw's web interface (port 3000) is bound to localhost. Access it via:
    sudo tailscale up
    
    # From your machine:
-   # Browse to http://TAILSCALE_IP:3000
+   # Use SSH tunnel: ssh -L 3000:localhost:3000 USER@TAILSCALE_IP
+   # Then browse to http://localhost:3000
    ```
 
 ## Network Flow
@@ -170,12 +170,12 @@ Container → NAT → Internet (outbound allowed)
 - Consider using Little Snitch or similar for enhanced macOS security
 
 ### IPv6
-- Docker IPv6 is disabled by default (`ip6tables: false` in daemon.json)
+- Docker IPv6 packet filtering is enabled (`ip6tables: true` in daemon.json)
 - If your network uses IPv6, review and test firewall rules accordingly
 
-### Installation Script
-- The `curl | bash` installation pattern has inherent risks
-- For high-security environments, clone the repository and audit before running
+### Installation Workflow
+- Use direct `ansible-playbook` commands with reviewed playbooks
+- For high-security environments, audit the repository before running
 - Consider using `--check` mode first: `ansible-playbook playbook-linux.yml --check`
 
 ## Security Checklist
@@ -192,5 +192,5 @@ After installation, verify:
 ## Reporting Security Issues
 
 If you discover a security vulnerability, please report it privately:
-- Clawdbot: https://github.com/clawdbot/clawdbot/security
-- This installer: https://github.com/openclaw/clawdbot-ansible/security
+- OpenClaw: https://github.com/openclaw/openclaw/security
+- This installer: https://github.com/openclaw/openclaw-ansible/security

@@ -36,18 +36,11 @@ ansible-playbook playbook-macos.yml --ask-become-pass \
 
 ### Method 2: Variables File
 
-Create a `vars.yml` file:
+Copy the project template and edit:
 
-```yaml
-# vars.yml
-openclaw_install_mode: development
-openclaw_ssh_keys:
-  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxx user@host"
-  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB... admin@laptop"
-openclaw_repo_url: "https://github.com/YOUR_USERNAME/openclaw.git"
-openclaw_repo_branch: "main"
-tailscale_authkey: "tskey-auth-xxxxxxxxxxxxx"
-nodejs_version: "22.x"
+```bash
+cp vars.example.yml vars.yml
+$EDITOR vars.yml
 ```
 
 Then use it:

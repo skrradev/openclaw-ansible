@@ -18,25 +18,21 @@ description: Technical implementation details
 └──────────────┬──────────────────────────┘
                │
 ┌──────────────┴──────────────────────────┐
-│ Docker Daemon                            │
+│ OpenClaw Host Service                    │
+│ User: openclaw                           │
+│ Managed by systemd                       │
+└──────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Docker Daemon (sandbox workloads)       │
 │ - Non-root containers                    │
 │ - Localhost-only binding                 │
-└──────────────┬──────────────────────────┘
-               │
-┌──────────────┴──────────────────────────┐
-│ OpenClaw Container                       │
-│ User: openclaw                           │
-│ Port: 127.0.0.1:3000                     │
-└──────────────────────────────────────────┘
+└─────────────────────────────────────────┘
 ```
 
 ## File Structure
 
 ```
-/opt/openclaw/
-├── Dockerfile
-├── docker-compose.yml
-
 /home/openclaw/.openclaw/
 ├── config.yml
 ├── sessions/
@@ -54,11 +50,10 @@ description: Technical implementation details
 
 ## Service Management
 
-OpenClaw runs as a systemd service that manages the Docker container:
+OpenClaw runs as a systemd service on the host:
 
 ```bash
-# Systemd controls Docker Compose
-systemd → docker compose → openclaw container
+systemd → openclaw gateway (host process)
 ```
 
 ## Installation Flow (Linux)
@@ -75,7 +70,8 @@ systemd → docker compose → openclaw container
    - Install Tailscale package
    - Display connection instructions
 
-3. **User Creation** (`roles/linux/tasks/user.yml`)
+3. **User Setup** (`roles/linux/tasks/admin-user.yml` + `roles/linux/tasks/user.yml`)
+   - Optional admin bootstrap user (bare metal)
    - Create `openclaw` system user
 
 4. **Docker Installation** (`roles/linux/tasks/docker.yml`)
@@ -95,11 +91,9 @@ systemd → docker compose → openclaw container
    - Install pnpm globally
 
 7. **OpenClaw Setup** (`roles/linux/tasks/openclaw.yml`)
-   - Create directories
-   - Generate configs from templates
-   - Build Docker image
-   - Start container via Compose
-   - Install systemd service
+   - Create OpenClaw directories
+   - Install OpenClaw in release or development mode
+   - Prepare runtime environment for `openclaw` user
 
 ## Key Design Decisions
 
@@ -128,11 +122,12 @@ Principle of least privilege. If container is compromised, attacker has limited 
 roles/linux/tasks/main.yml
 ├── system-tools.yml (apt packages, oh-my-zsh, git config)
 ├── tailscale.yml (VPN setup)
+├── admin-user.yml (optional admin bootstrap user)
 ├── user.yml (create openclaw user)
 ├── docker.yml (install Docker, create /etc/docker)
 ├── firewall.yml (configure UFW + Docker daemon)
 ├── nodejs.yml (Node.js + pnpm)
-└── openclaw.yml (container setup)
+└── openclaw.yml (host setup)
 ```
 
 Order matters: Docker must be installed before firewall configuration because:

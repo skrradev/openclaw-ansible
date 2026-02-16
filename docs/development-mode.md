@@ -22,7 +22,7 @@ This guide explains how to install OpenClaw in **development mode**, where the a
 
 ```bash
 # Clone the ansible installer
-git clone https://github.com/pasogott/openclaw-ansible.git
+git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
 
 # Run in development mode (Linux)
@@ -39,7 +39,7 @@ ansible-playbook playbook-macos.yml --ask-become-pass -e openclaw_install_mode=d
 sudo apt update && sudo apt install -y ansible git
 
 # Clone repository
-git clone https://github.com/pasogott/openclaw-ansible.git
+git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
 
 # Install collections
@@ -190,7 +190,7 @@ The following aliases are added to `.bashrc`:
 Plus an environment variable:
 
 ```bash
-export CLAWDBOT_DEV_DIR="$HOME/code/openclaw"
+export OPENCLAW_DEV_DIR="$HOME/code/openclaw"
 ```
 
 ## Configuration Variables

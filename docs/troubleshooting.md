@@ -5,14 +5,14 @@ description: Common issues and solutions
 
 # Troubleshooting
 
-## Container Can't Reach Internet
+## Gateway Can't Reach Internet
 
 **Symptom**: OpenClaw can't connect to WhatsApp/Telegram
 
 **Check**:
 ```bash
-# Test from container
-sudo docker exec openclaw ping -c 3 8.8.8.8
+# Test host connectivity
+ping -c 3 8.8.8.8
 
 # Check UFW allows outbound
 sudo ufw status verbose | grep OUT
@@ -39,8 +39,8 @@ sudo systemctl restart openclaw
 sudo ss -tlnp | grep 3000
 
 # Change OpenClaw port
-sudo nano /opt/openclaw/docker-compose.yml
-# Change: "127.0.0.1:3001:3000"
+sudo -u openclaw nano /home/openclaw/.openclaw/config.yml
+# Update gateway/listen port in config as needed
 
 sudo systemctl restart openclaw
 ```
@@ -64,29 +64,25 @@ sudo ufw allow 22/tcp
 sudo ufw enable
 ```
 
-## Container Won't Start
+## Service Won't Start
 
 **Check logs**:
 ```bash
 # Systemd logs
 sudo journalctl -u openclaw -n 50
 
-# Docker logs
-sudo docker logs openclaw
-
-# Compose status
-sudo docker compose -f /opt/openclaw/docker-compose.yml ps
+# Service status
+sudo systemctl status openclaw
 ```
 
 **Common fixes**:
 ```bash
-# Rebuild image
-cd /opt/openclaw
-sudo docker compose build --no-cache
-sudo systemctl restart openclaw
+# Re-run playbook to reconcile packages/config
+ansible-playbook playbook-linux.yml --ask-become-pass
 
 # Check permissions
 sudo chown -R openclaw:openclaw /home/openclaw/.openclaw
+sudo systemctl restart openclaw
 ```
 
 ## Verify Docker Isolation

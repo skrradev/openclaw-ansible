@@ -31,7 +31,7 @@ sudo apt install -y ansible git
 ### Clone and Run
 
 ```bash
-git clone https://github.com/pasogott/openclaw-ansible.git
+git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
 
 # Install Ansible collections
@@ -77,11 +77,15 @@ sudo nano /home/openclaw/.openclaw/config.yml
 ### 3. Login to Provider
 
 ```bash
-# Login (will prompt for QR code or phone verification)
-sudo docker exec -it openclaw openclaw login
+# Switch to openclaw user
+sudo su - openclaw
 
-# Check connection
-sudo docker logs -f openclaw
+# Login (prompts for provider auth)
+openclaw providers login
+
+# Verify status and logs
+openclaw status
+openclaw logs
 ```
 
 ## Service Management
@@ -102,21 +106,14 @@ sudo systemctl enable openclaw
 sudo systemctl disable openclaw
 ```
 
-### Docker Commands
+### OpenClaw Commands
 
 ```bash
-# View logs
-sudo docker logs openclaw
-sudo docker logs -f openclaw  # follow
-
-# Shell access
-sudo docker exec -it openclaw bash
-
-# Restart container
-sudo docker restart openclaw
-
-# Check status
-sudo docker compose -f /opt/openclaw/docker-compose.yml ps
+# Run as openclaw user
+sudo su - openclaw
+openclaw status
+openclaw logs
+openclaw gateway
 ```
 
 ### Firewall Management
@@ -137,14 +134,13 @@ sudo iptables -L DOCKER-USER -n -v
 
 OpenClaw's web interface runs on port 3000 (localhost only).
 
-### Via Tailscale (Recommended)
+### Via Tailscale + SSH Tunnel
 
 ```bash
-# After connecting Tailscale, browse to:
-http://TAILSCALE_IP:3000
+# From your machine
+ssh -L 3000:localhost:3000 USER@TAILSCALE_IP
+# Then browse to: http://localhost:3000
 ```
-
-Wait, port 3000 is bound to localhost, so this won't work directly. Need to update the compose file or use SSH tunnel.
 
 ### Via SSH Tunnel
 
@@ -201,12 +197,12 @@ sudo systemctl stop openclaw
 sudo systemctl disable openclaw
 sudo tailscale down
 
-# Remove containers and data
-sudo docker compose -f /opt/openclaw/docker-compose.yml down
-sudo rm -rf /opt/openclaw
-sudo rm -rf /home/openclaw/.openclaw
+# Remove service and data
 sudo rm /etc/systemd/system/openclaw.service
 sudo systemctl daemon-reload
+sudo rm -rf /home/openclaw/.openclaw
+sudo rm -rf /home/openclaw/.local/share/pnpm
+sudo rm -rf /home/openclaw/.local/bin/openclaw
 
 # Remove packages (optional)
 sudo apt remove --purge tailscale docker-ce docker-ce-cli containerd.io docker-compose-plugin nodejs
@@ -221,39 +217,18 @@ sudo ufw --force reset
 
 ## Advanced Configuration
 
-### Custom Port
+### Gateway Configuration
 
-Edit `/opt/openclaw/docker-compose.yml`:
+Edit OpenClaw config:
 
-```yaml
-ports:
-  - "127.0.0.1:3001:3000"  # Change 3001 to desired port
+```bash
+sudo nano /home/openclaw/.openclaw/config.yml
 ```
 
 Then restart:
+
 ```bash
 sudo systemctl restart openclaw
-```
-
-### Environment Variables
-
-Add to `/opt/openclaw/docker-compose.yml`:
-
-```yaml
-environment:
-  - NODE_ENV=production
-  - ANTHROPIC_API_KEY=sk-ant-xxx
-  - DEBUG=openclaw:*
-```
-
-### Volume Mounts
-
-Add additional volumes in docker-compose.yml:
-
-```yaml
-volumes:
-  - /home/openclaw/.openclaw:/home/openclaw/.openclaw
-  - /path/to/custom:/custom
 ```
 
 ## Automation
