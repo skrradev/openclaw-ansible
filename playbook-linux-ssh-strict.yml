@@ -1,0 +1,25 @@
+---
+- name: Apply OpenClaw strict SSH hardening on Linux
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  pre_tasks:
+    - name: Install Ansible collections
+      ansible.builtin.command: ansible-galaxy collection install -r requirements.yml
+      args:
+        chdir: "{{ playbook_dir }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      changed_when: false
+
+  tasks:
+    - name: Include strict SSH hardening tasks
+      ansible.builtin.include_role:
+        name: linux
+        tasks_from: ssh-strict.yml
+      tags: [security, ssh, strict]

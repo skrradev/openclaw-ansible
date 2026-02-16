@@ -25,8 +25,11 @@ This guide explains how to install OpenClaw in **development mode**, where the a
 git clone https://github.com/pasogott/openclaw-ansible.git
 cd openclaw-ansible
 
-# Run in development mode
-./run-playbook.sh -e openclaw_install_mode=development
+# Run in development mode (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass -e openclaw_install_mode=development
+
+# Run in development mode (macOS)
+ansible-playbook playbook-macos.yml --ask-become-pass -e openclaw_install_mode=development
 ```
 
 ### Manual Install

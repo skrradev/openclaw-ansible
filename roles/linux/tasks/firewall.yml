@@ -74,6 +74,35 @@
       Unattended-Upgrade::Remove-Unused-Dependencies "true";
       Unattended-Upgrade::Automatic-Reboot "false";
 
+# SSH baseline hardening (safe defaults for first install)
+- name: Remove legacy OpenClaw SSH hardening drop-in
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d/99-openclaw-hardening.conf
+    state: absent
+  notify: Restart sshd
+
+- name: Configure baseline SSH hardening
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/60-openclaw-baseline.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # OpenClaw baseline SSH hardening (safe defaults)
+      # Strict key-only mode is applied separately via playbook-linux-ssh-strict.yml.
+      PermitRootLogin prohibit-password
+      PubkeyAuthentication yes
+      MaxAuthTries 3
+      X11Forwarding no
+      AllowAgentForwarding no
+  register: baseline_ssh_config
+  notify: Restart sshd
+
+- name: Validate sshd configuration after baseline hardening
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false
+  when: baseline_ssh_config.changed
+
 # UFW Firewall configuration
 - name: Install UFW
   ansible.builtin.apt:

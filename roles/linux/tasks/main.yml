@@ -7,6 +7,10 @@
   ansible.builtin.include_tasks: tailscale.yml
   tags: [tailscale]
 
+- name: Include admin user tasks
+  ansible.builtin.include_tasks: admin-user.yml
+  tags: [user, admin-user]
+
 - name: Include user creation tasks
   ansible.builtin.include_tasks: user.yml
   tags: [user]

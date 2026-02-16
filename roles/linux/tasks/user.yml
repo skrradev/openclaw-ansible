@@ -1,4 +1,5 @@
 ---
+# OpenClaw service user
 - name: Create openclaw system user
   ansible.builtin.user:
     name: openclaw
@@ -53,9 +54,6 @@
       openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl status openclaw
       openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable openclaw
       openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable openclaw
-      # daemon-reload affects all units (required after service file changes)
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl daemon-reload
-
       # Tailscale - diagnostics + connect/disconnect
       # NOTE: 'up' allows flags like --advertise-exit-node. For tighter control,
       # remove 'up' and 'down' lines - operator must then manage VPN manually.

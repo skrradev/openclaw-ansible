@@ -39,3 +39,12 @@ openclaw_repo_dir: "{{ openclaw_code_dir }}/openclaw"
 #     - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx user@host"
 #     - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDxxxxxxxxxxxxxxxxxxxxxxx user@host"
 openclaw_ssh_keys: []
+
+# Admin user (optional — for Hetzner/bare metal where you start as root)
+# Leave empty to skip admin user creation (e.g. AWS already has ubuntu user)
+admin_user: ""
+admin_ssh_keys: []
+
+# Existing admin user (cloud images) for strict SSH hardening preflight
+# Example: ubuntu (AWS/GCP Ubuntu), debian (GCP Debian)
+existing_admin_user: ""

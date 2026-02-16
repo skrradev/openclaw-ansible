@@ -52,18 +52,3 @@
 - name: Include development installation (git clone + build + link)
   ansible.builtin.include_tasks: openclaw-development.yml
   when: openclaw_install_mode == "development"
-
-- name: Configure .bashrc for openclaw user (base config)
-  ansible.builtin.blockinfile:
-    path: "{{ openclaw_home }}/.bashrc"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw pnpm"
-    block: |
-      # pnpm configuration
-      export PNPM_HOME="{{ openclaw_home }}/.local/share/pnpm"
-      export PATH="{{ openclaw_home }}/.local/bin:$PNPM_HOME:$PATH"
-    create: true
-    owner: "{{ openclaw_user }}"
-    group: "{{ openclaw_user }}"
-    mode: '0644'
-    insertafter: EOF
-

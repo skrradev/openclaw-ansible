@@ -1,0 +1,25 @@
+---
+# OpenClaw Ansible variables example
+# Copy to vars.yml and edit values for your environment.
+
+# Installation mode: release or development
+openclaw_install_mode: "release"
+
+# SSH keys for openclaw user
+openclaw_ssh_keys:
+  - "ssh-ed25519 AAAA... replace-with-your-openclaw-key"
+
+# Linux admin model
+# Cloud images (AWS/GCP): leave admin_user empty and set existing_admin_user.
+# Bare metal: set admin_user/admin_ssh_keys and clear existing_admin_user.
+admin_user: ""
+admin_ssh_keys: []
+existing_admin_user: "ubuntu"
+
+# Optional
+tailscale_authkey: ""
+nodejs_version: "22.x"
+
+# Development mode overrides (optional)
+# openclaw_repo_url: "https://github.com/openclaw/openclaw.git"
+# openclaw_repo_branch: "main"

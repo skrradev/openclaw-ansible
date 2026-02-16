@@ -8,7 +8,15 @@ description: Detailed installation and configuration instructions
 ## Quick Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pasogott/openclaw-ansible/main/install.sh | bash
+git clone https://github.com/openclaw/openclaw-ansible.git
+cd openclaw-ansible
+ansible-galaxy collection install -r requirements.yml
+
+# Linux
+ansible-playbook playbook-linux.yml --ask-become-pass
+
+# macOS
+ansible-playbook playbook-macos.yml --ask-become-pass
 ```
 
 ## Manual Installation

@@ -20,6 +20,14 @@ ansible-playbook playbook-linux.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
 
+# Linux (bare metal): admin user + admin SSH key + openclaw SSH key
+ansible-playbook playbook-linux.yml --ask-become-pass \
+  -e '{"admin_user":"adminops","admin_ssh_keys":["ssh-ed25519 AAAA... admin@laptop"],"openclaw_ssh_keys":["ssh-ed25519 AAAA... openclaw@laptop"]}'
+
+# Linux (cloud): strict hardening with existing image admin user
+ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass \
+  -e existing_admin_user=ubuntu
+
 # macOS
 ansible-playbook playbook-macos.yml --ask-become-pass \
   -e openclaw_install_mode=development \
@@ -50,6 +58,21 @@ ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
 
 # macOS
 ansible-playbook playbook-macos.yml --ask-become-pass -e @vars.yml
+```
+
+## Linux Hardening Phases
+
+Use separate playbooks for each Linux hardening phase:
+
+```bash
+# Phase 1: Baseline install + baseline SSH hardening
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
+
+# Phase 2: Strict SSH hardening (key-only, no root login)
+ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass -e @vars.yml
+
+# Phase 3: Optional Tailscale-only SSH firewall lock down
+ansible-playbook playbook-linux-ssh-lockdown.yml --ask-become-pass
 ```
 
 ### Method 3: Edit Defaults
@@ -92,6 +115,34 @@ Directly edit `roles/linux/defaults/main.yml` or `roles/macos/defaults/main.yml`
   ```
   ```bash
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
+  ```
+
+#### `admin_user` (Linux only)
+- **Type**: String
+- **Default**: `""` (empty)
+- **Description**: Optional admin user to create (recommended for bare metal bootstrap). When set, installer creates `/etc/sudoers.d/<admin_user>` with `NOPASSWD: ALL`.
+- **Example**:
+  ```bash
+  -e admin_user=adminops
+  ```
+
+#### `admin_ssh_keys` (Linux only)
+- **Type**: List of strings
+- **Default**: `[]` (empty)
+- **Description**: SSH public keys to add for `admin_user`
+- **Example**:
+  ```yaml
+  admin_ssh_keys:
+    - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... admin@laptop"
+  ```
+
+#### `existing_admin_user` (Linux only)
+- **Type**: String
+- **Default**: `""` (empty)
+- **Description**: Existing cloud admin user used by strict SSH preflight (for AWS/GCP images)
+- **Example**:
+  ```bash
+  -e existing_admin_user=ubuntu
   ```
 
 ### Installation Mode

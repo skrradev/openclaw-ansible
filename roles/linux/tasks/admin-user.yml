@@ -1,0 +1,49 @@
+---
+# Admin user bootstrap (optional — skipped if admin_user is empty)
+- name: Create admin user
+  ansible.builtin.user:
+    name: "{{ admin_user }}"
+    comment: "Admin User"
+    shell: /bin/bash
+    create_home: true
+    groups: sudo
+    append: true
+    state: present
+  when: admin_user | length > 0
+
+- name: Create .ssh directory for admin user
+  ansible.builtin.file:
+    path: "/home/{{ admin_user }}/.ssh"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0700'
+  when: admin_user | length > 0
+
+- name: Add SSH authorized keys for admin user
+  ansible.posix.authorized_key:
+    user: "{{ admin_user }}"
+    state: present
+    key: "{{ item }}"
+  loop: "{{ admin_ssh_keys }}"
+  when:
+    - admin_user | length > 0
+    - admin_ssh_keys | length > 0
+
+- name: Disable password for admin user (key-only)
+  ansible.builtin.user:
+    name: "{{ admin_user }}"
+    password: '!'
+  when: admin_user | length > 0
+
+- name: Add admin user to sudoers with NOPASSWD
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ admin_user }}"
+    owner: root
+    group: root
+    mode: '0440'
+    content: |
+      # Managed by OpenClaw Ansible: admin bootstrap account
+      {{ admin_user }} ALL=(ALL) NOPASSWD: ALL
+    validate: /usr/sbin/visudo -cf %s
+  when: admin_user | length > 0

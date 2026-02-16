@@ -1,0 +1,81 @@
+---
+# Strict SSH hardening (key-only, no root login).
+# Run this after confirming non-root admin key access works.
+
+- name: Assert strict SSH hardening prerequisites
+  ansible.builtin.assert:
+    that:
+      - (admin_user | length > 0 and admin_ssh_keys | length > 0) or (existing_admin_user | length > 0)
+    fail_msg: >-
+      Strict SSH hardening requires either admin_user + admin_ssh_keys (bare metal)
+      or existing_admin_user (cloud images like AWS/GCP).
+    quiet: true
+
+- name: Select strict SSH admin user
+  ansible.builtin.set_fact:
+    strict_ssh_admin_user: "{{ admin_user if (admin_user | length > 0 and admin_ssh_keys | length > 0) else existing_admin_user }}"
+
+- name: Assert strict SSH admin user is non-root
+  ansible.builtin.assert:
+    that:
+      - strict_ssh_admin_user != "root"
+    fail_msg: "strict_ssh_admin_user cannot be root because strict mode disables root SSH login."
+    quiet: true
+
+- name: Lookup strict SSH admin user account
+  ansible.builtin.command: "getent passwd {{ strict_ssh_admin_user }}"
+  register: strict_ssh_admin_passwd
+  changed_when: false
+  failed_when: strict_ssh_admin_passwd.rc != 0
+
+- name: Set strict SSH admin home directory
+  ansible.builtin.set_fact:
+    strict_ssh_admin_home: "{{ strict_ssh_admin_passwd.stdout.split(':')[5] }}"
+
+- name: Check strict SSH admin authorized_keys
+  ansible.builtin.stat:
+    path: "{{ strict_ssh_admin_home }}/.ssh/authorized_keys"
+  register: strict_ssh_authorized_keys
+
+- name: Assert strict SSH admin key access exists
+  ansible.builtin.assert:
+    that:
+      - strict_ssh_authorized_keys.stat.exists
+      - strict_ssh_authorized_keys.stat.size | int > 0
+    fail_msg: >-
+      strict_ssh_admin_user must have a non-empty authorized_keys before strict hardening.
+    quiet: true
+
+- name: Verify strict SSH admin has sudo privileges
+  ansible.builtin.command: "sudo -l -U {{ strict_ssh_admin_user }}"
+  register: strict_ssh_admin_sudo
+  changed_when: false
+  failed_when: false
+
+- name: Assert strict SSH admin can use sudo
+  ansible.builtin.assert:
+    that:
+      - strict_ssh_admin_sudo.rc == 0
+    fail_msg: "strict_ssh_admin_user must have sudo privileges before strict hardening."
+    quiet: true
+
+- name: Configure strict SSH hardening
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/99-openclaw-strict.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      # OpenClaw strict SSH hardening
+      PermitRootLogin no
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      ChallengeResponseAuthentication no
+      PubkeyAuthentication yes
+  register: strict_ssh_config
+  notify: Restart sshd
+
+- name: Validate sshd configuration after strict hardening
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false
+  when: strict_ssh_config.changed

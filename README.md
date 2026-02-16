@@ -16,7 +16,7 @@ Automated, hardened installation of [OpenClaw](https://github.com/openclaw/openc
 - **Homebrew**: Package manager for both Linux and macOS
 - **Docker**: Docker CE (Linux) / Docker Desktop (macOS)
 - **Multi-OS Support**: Debian, Ubuntu, and macOS
-- **One-command install**: Complete setup in minutes
+- **Direct Ansible install**: Explicit playbook-driven setup
 - **Auto-configuration**: DBus, systemd, environment setup
 - **pnpm installation**: Uses `pnpm install -g openclaw@latest`
 
@@ -24,10 +24,18 @@ Automated, hardened installation of [OpenClaw](https://github.com/openclaw/openc
 
 ### Release Mode (Recommended)
 
-Install the latest stable version from npm:
+Install the latest stable version from npm via Ansible:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/install.sh | bash
+git clone https://github.com/skrradev/openclaw-ansible.git
+cd openclaw-ansible
+ansible-galaxy collection install -r requirements.yml
+
+# Linux
+ansible-playbook playbook-linux.yml --ask-become-pass
+
+# macOS
+ansible-playbook playbook-macos.yml --ask-become-pass
 ```
 
 ### Development Mode
@@ -39,8 +47,11 @@ Install from source for development or testing:
 git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
 
-# Install in development mode (auto-detects OS)
-./run-playbook.sh -e openclaw_install_mode=development
+# Install in development mode (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass -e openclaw_install_mode=development
+
+# Install in development mode (macOS)
+ansible-playbook playbook-macos.yml --ask-become-pass -e openclaw_install_mode=development
 ```
 
 ## What Gets Installed
@@ -92,6 +103,20 @@ openclaw status
 openclaw logs
 ```
 
+### Systemd Scope
+
+- `openclaw` has scoped sudo for `openclaw` service management only.
+- `sudo systemctl daemon-reload` is intentionally not granted to `openclaw`.
+- If `openclaw` creates user-level services, use `systemctl --user`:
+
+```bash
+mkdir -p ~/.config/systemd/user
+# place your user unit file in ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now my-worker.service
+systemctl --user status my-worker.service
+```
+
 ## Installation Modes
 
 ### Release Mode (Default)
@@ -134,6 +159,29 @@ cd openclaw-ansible
 # Review playbook-linux.yml and roles/linux/
 ansible-playbook playbook-linux.yml --check --diff  # Dry run
 ansible-playbook playbook-linux.yml --ask-become-pass
+```
+
+### Multi-Phase Linux Hardening
+
+Use explicit playbooks for each phase:
+
+```bash
+# 1) Baseline install (safe defaults, non-locking SSH hardening)
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
+
+# 2) Strict SSH hardening (key-only auth + no root login)
+ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass -e @vars.yml
+
+# 3) Optional: lock SSH to tailscale0 only
+ansible-playbook playbook-linux-ssh-lockdown.yml --ask-become-pass
+```
+
+For cloud images (AWS/GCP), do not create a new admin user. Set:
+
+```yaml
+admin_user: ""
+admin_ssh_keys: []
+existing_admin_user: "ubuntu"  # or debian, based on image
 ```
 
 ## Documentation
@@ -193,8 +241,11 @@ cd openclaw-ansible
 # Install Ansible collections
 ansible-galaxy collection install -r requirements.yml
 
-# Run installation (auto-detects OS)
-./run-playbook.sh
+# Run installation (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass
+
+# Run installation (macOS)
+ansible-playbook playbook-macos.yml --ask-become-pass
 ```
 
 ### Development Mode
@@ -202,13 +253,10 @@ ansible-galaxy collection install -r requirements.yml
 Build from source for development:
 
 ```bash
-# Same as above, but with development mode flag
-./run-playbook.sh -e openclaw_install_mode=development
-
-# Or directly (Linux):
+# Linux:
 ansible-playbook playbook-linux.yml --ask-become-pass -e openclaw_install_mode=development
 
-# Or directly (macOS):
+# macOS:
 ansible-playbook playbook-macos.yml --ask-become-pass -e openclaw_install_mode=development
 ```
 
@@ -229,28 +277,37 @@ You can override them in three ways:
 ### 1. Via Command Line
 
 ```bash
-./run-playbook.sh \
+# Linux: development mode + openclaw SSH key
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
+
+# Linux: create admin user with admin + openclaw SSH keys
+ansible-playbook playbook-linux.yml --ask-become-pass \
+  -e '{"admin_user":"adminops","admin_ssh_keys":["ssh-ed25519 AAAA... admin@laptop"],"openclaw_ssh_keys":["ssh-ed25519 AAAA... openclaw@laptop"]}'
+
+# Linux: strict SSH hardening for cloud default user
+ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass \
+  -e existing_admin_user=ubuntu
 ```
 
 ### 2. Via Variables File
 
 ```bash
-# Create vars.yml
-cat > vars.yml << EOF
-openclaw_install_mode: development
-openclaw_ssh_keys:
-  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxxxxxxxx user@host"
-  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB... user@host"
-openclaw_repo_url: "https://github.com/YOUR_USERNAME/openclaw.git"
-openclaw_repo_branch: "feature-branch"
-tailscale_authkey: "tskey-auth-xxxxxxxxxxxxx"
-EOF
+# Copy template
+cp vars.example.yml vars.yml
 
-# Use it (auto-detects OS)
-./run-playbook.sh -e @vars.yml
+# Edit vars.yml for your environment
+$EDITOR vars.yml
+
+# Use it (Linux)
+ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
+
+# Use it (macOS)
+ansible-playbook playbook-macos.yml --ask-become-pass -e @vars.yml
 ```
+
+`vars.example.yml` includes cloud defaults (`existing_admin_user`) and notes for bare-metal admin bootstrap.
 
 ### 3. Edit Defaults Directly
 
@@ -264,6 +321,9 @@ Edit the role defaults before running the playbook.
 | `openclaw_home` | `/home/openclaw` (Linux) / `/Users/openclaw` (macOS) | User home directory |
 | `openclaw_install_mode` | `release` | `release` or `development` |
 | `openclaw_ssh_keys` | `[]` | List of SSH public keys |
+| `admin_user` | `""` | Optional admin user to create (bare metal, includes NOPASSWD sudoers drop-in) |
+| `admin_ssh_keys` | `[]` | SSH public keys for `admin_user` |
+| `existing_admin_user` | `""` | Existing cloud admin user for strict SSH checks |
 | `openclaw_repo_url` | `https://github.com/openclaw/openclaw.git` | Git repository (dev mode) |
 | `openclaw_repo_branch` | `main` | Git branch (dev mode) |
 | `tailscale_authkey` | `""` | Tailscale auth key for auto-connect |
@@ -274,14 +334,21 @@ Edit the role defaults before running the playbook.
 #### SSH Keys for Remote Access
 
 ```bash
-./run-playbook.sh \
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
+```
+
+#### Admin + OpenClaw SSH Keys (Bare Metal)
+
+```bash
+ansible-playbook playbook-linux.yml --ask-become-pass \
+  -e '{"admin_user":"adminops","admin_ssh_keys":["ssh-ed25519 AAAA... admin@laptop"],"openclaw_ssh_keys":["ssh-ed25519 AAAA... openclaw@laptop"]}'
 ```
 
 #### Development Mode with Custom Repository
 
 ```bash
-./run-playbook.sh \
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e openclaw_repo_url=https://github.com/YOUR_USERNAME/openclaw.git \
   -e openclaw_repo_branch=feature-branch
@@ -290,7 +357,7 @@ Edit the role defaults before running the playbook.
 #### Tailscale Auto-Connect
 
 ```bash
-./run-playbook.sh \
+ansible-playbook playbook-linux.yml --ask-become-pass \
   -e tailscale_authkey=tskey-auth-xxxxxxxxxxxxx
 ```
 

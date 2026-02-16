@@ -32,6 +32,10 @@ ProtectSystem=strict
 ProtectHome=read-only
 ReadWritePaths={{ openclaw_home }}/.openclaw
 ReadWritePaths={{ openclaw_home }}/.local
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
 
 # Logging
 StandardOutput=journal

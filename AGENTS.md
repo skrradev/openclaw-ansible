@@ -13,7 +13,7 @@ Two independent, self-contained playbooks with zero shared code:
 ## Key Principles
 
 1. **Security First**: Firewall must be configured before Docker installation
-2. **One Command Install**: `curl | bash` should work out of the box
+2. **Direct Playbook Install**: Use explicit `ansible-playbook` commands
 3. **Localhost Only**: All container ports bind to 127.0.0.1
 4. **Defense in Depth**: UFW + DOCKER-USER + localhost binding + non-root container
 5. **Complete OS separation**: No cross-OS conditionals, no shared role code
@@ -78,7 +78,7 @@ ansible-playbook playbook-macos.yml --syntax-check
 ansible-playbook playbook-linux.yml --check
 
 # 3. Full install (on test VM)
-curl -fsSL https://raw.githubusercontent.com/.../install.sh | bash
+ansible-playbook playbook-linux.yml --ask-become-pass
 
 # 4. Verify security (Linux)
 sudo ufw status verbose
@@ -135,9 +135,9 @@ Keep docs concise. No progress logs, no refactoring summaries.
 ### Repository
 ```
 playbook-linux.yml   # Linux entry point
+playbook-linux-ssh-strict.yml  # Linux strict SSH hardening
+playbook-linux-ssh-lockdown.yml  # Linux Tailscale-only SSH lockdown
 playbook-macos.yml   # macOS entry point
-install.sh           # Auto-detecting installer
-run-playbook.sh      # Auto-detecting runner
 
 roles/linux/         # Self-contained Linux role
 ├── tasks/           # Ansible tasks (order matters!)

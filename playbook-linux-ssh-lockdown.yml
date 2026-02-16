@@ -1,0 +1,54 @@
+---
+- name: Lock down SSH to Tailscale only
+  hosts: localhost
+  connection: local
+  become: true
+
+  pre_tasks:
+    - name: Install Ansible collections
+      ansible.builtin.command: ansible-galaxy collection install -r requirements.yml
+      args:
+        chdir: "{{ playbook_dir }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      changed_when: false
+
+  tasks:
+    - name: Verify Tailscale is connected
+      ansible.builtin.command: tailscale status
+      register: ts_status
+      changed_when: false
+      failed_when: "'Tailscale is stopped' in ts_status.stdout or ts_status.rc != 0"
+
+    - name: Verify tailscale0 interface exists
+      ansible.builtin.command: ip link show tailscale0
+      changed_when: false
+
+    - name: Allow SSH only via Tailscale interface
+      community.general.ufw:
+        rule: allow
+        interface_in: tailscale0
+        port: '22'
+        proto: tcp
+        comment: 'SSH via Tailscale only'
+
+    - name: Verify Tailscale-only SSH rule is present
+      ansible.builtin.command: ufw status
+      register: ufw_status
+      changed_when: false
+      failed_when:
+        - "'22/tcp' not in ufw_status.stdout"
+        - "'tailscale0' not in ufw_status.stdout"
+
+    - name: Remove open SSH rule
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+        delete: true
+        comment: 'SSH'
+
+    - name: Reload UFW
+      community.general.ufw:
+        state: reloaded
