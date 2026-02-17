@@ -37,9 +37,7 @@
       ansible.builtin.command: ufw status
       register: ufw_status
       changed_when: false
-      failed_when:
-        - "'22/tcp' not in ufw_status.stdout"
-        - "'tailscale0' not in ufw_status.stdout"
+      failed_when: "'22/tcp' not in ufw_status.stdout or 'tailscale0' not in ufw_status.stdout"
 
     - name: Remove open SSH rule
       community.general.ufw:
