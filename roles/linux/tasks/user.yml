@@ -69,9 +69,6 @@
       openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale serve --bg --yes *
       openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale serve reset
       openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale serve status
-      openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale funnel --bg --yes *
-      openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale funnel reset
-      openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale funnel status --json
       openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale status --json
       openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale whois --json *
 
