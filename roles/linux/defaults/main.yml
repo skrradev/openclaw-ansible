@@ -40,15 +40,11 @@ openclaw_repo_dir: "{{ openclaw_code_dir }}/openclaw"
 #     - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDxxxxxxxxxxxxxxxxxxxxxxx user@host"
 openclaw_ssh_keys: []
 
-# Admin user (optional — for Hetzner/bare metal where you start as root)
-# Leave empty to skip admin user creation (e.g. AWS already has ubuntu user)
+# Admin user (optional)
+# Set the username of the admin account. Leave empty to skip.
+#   - With admin_ssh_keys: creates the user, adds keys, grants NOPASSWD sudo (bare metal)
+#   - Without admin_ssh_keys: assumes user already exists (cloud images like AWS/GCP)
+# Also used by playbook-linux-ssh-strict.yml to verify key+sudo access before hardening.
+# Example: ubuntu (AWS), debian (GCP), adminops (bare metal)
 admin_user: ""
 admin_ssh_keys: []
-
-# Canonical admin account for strict SSH hardening preflight (recommended)
-# Example: ubuntu (AWS/GCP Ubuntu), debian (GCP Debian), adminops (bare metal)
-ssh_admin_user: ""
-
-# Backward compatibility for previous config style (prefer ssh_admin_user)
-# Existing admin user (cloud images) for strict SSH hardening preflight
-existing_admin_user: ""

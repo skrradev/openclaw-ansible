@@ -26,7 +26,7 @@ ansible-playbook playbook-linux.yml --ask-become-pass \
 
 # Linux (cloud): strict hardening with existing image admin user
 ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass \
-  -e ssh_admin_user=ubuntu
+  -e admin_user=ubuntu
 
 # macOS
 ansible-playbook playbook-macos.yml --ask-become-pass \
@@ -113,38 +113,24 @@ Directly edit `roles/linux/defaults/main.yml` or `roles/macos/defaults/main.yml`
 #### `admin_user` (Linux only)
 - **Type**: String
 - **Default**: `""` (empty)
-- **Description**: Optional admin user to create (recommended for bare metal bootstrap). When set, installer creates `/etc/sudoers.d/<admin_user>` with `NOPASSWD: ALL`.
-- **Example**:
+- **Description**: Admin username. With `admin_ssh_keys`: creates the user, adds keys, grants NOPASSWD sudo (bare metal). Without `admin_ssh_keys`: assumes user already exists (cloud images). Also used by `playbook-linux-ssh-strict.yml` to verify key+sudo access before hardening.
+- **Examples**:
   ```bash
-  -e admin_user=adminops
+  # Cloud (existing user):
+  -e admin_user=ubuntu
+
+  # Bare metal (create user):
+  -e '{"admin_user":"adminops","admin_ssh_keys":["ssh-ed25519 AAAA..."]}'
   ```
 
 #### `admin_ssh_keys` (Linux only)
 - **Type**: List of strings
 - **Default**: `[]` (empty)
-- **Description**: SSH public keys to add for `admin_user`
+- **Description**: SSH public keys for `admin_user`. When non-empty, triggers user creation with NOPASSWD sudo.
 - **Example**:
   ```yaml
   admin_ssh_keys:
     - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... admin@laptop"
-  ```
-
-#### `existing_admin_user` (Linux only)
-- **Type**: String
-- **Default**: `""` (empty)
-- **Description**: Legacy fallback for strict SSH preflight (prefer `ssh_admin_user`)
-- **Example**:
-  ```bash
-  -e existing_admin_user=ubuntu
-  ```
-
-#### `ssh_admin_user` (Linux only)
-- **Type**: String
-- **Default**: `""` (empty)
-- **Description**: Canonical admin user used by strict SSH preflight (cloud or bare metal)
-- **Example**:
-  ```bash
-  -e ssh_admin_user=ubuntu
   ```
 
 ### Installation Mode

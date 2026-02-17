@@ -32,11 +32,9 @@ cd openclaw-ansible
 ansible-galaxy collection install -r requirements.yml
 
 # Linux
-ansible-playbook playbook-linux.yml --ask-become-pass
-
+ansible-playbook playbook-linux.yml
 # macOS
-ansible-playbook playbook-macos.yml --ask-become-pass
-```
+ansible-playbook playbook-macos.yml```
 
 ### Development Mode
 
@@ -158,8 +156,7 @@ git clone https://github.com/openclaw/openclaw-ansible.git
 cd openclaw-ansible
 # Review playbook-linux.yml and roles/linux/
 ansible-playbook playbook-linux.yml --check --diff  # Dry run
-ansible-playbook playbook-linux.yml --ask-become-pass
-```
+ansible-playbook playbook-linux.yml```
 
 ### Multi-Phase Linux Hardening
 
@@ -173,15 +170,12 @@ ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
 ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass -e @vars.yml
 
 # 3) Optional: lock SSH to tailscale0 only
-ansible-playbook playbook-linux-ssh-lockdown.yml --ask-become-pass
-```
+ansible-playbook playbook-linux-ssh-lockdown.yml```
 
-For cloud images (AWS/GCP), do not create a new admin user. Set:
+For cloud images (AWS/GCP), point to the existing admin user (no creation):
 
 ```yaml
-admin_user: ""
-admin_ssh_keys: []
-ssh_admin_user: "ubuntu"  # or debian/ec2-user, based on image
+admin_user: "ubuntu"  # or debian/ec2-user, based on image
 ```
 
 ## Documentation
@@ -242,11 +236,9 @@ cd openclaw-ansible
 ansible-galaxy collection install -r requirements.yml
 
 # Run installation (Linux)
-ansible-playbook playbook-linux.yml --ask-become-pass
-
+ansible-playbook playbook-linux.yml
 # Run installation (macOS)
-ansible-playbook playbook-macos.yml --ask-become-pass
-```
+ansible-playbook playbook-macos.yml```
 
 ### Development Mode
 
@@ -288,7 +280,7 @@ ansible-playbook playbook-linux.yml --ask-become-pass \
 
 # Linux: strict SSH hardening for cloud default user
 ansible-playbook playbook-linux-ssh-strict.yml --ask-become-pass \
-  -e ssh_admin_user=ubuntu
+  -e admin_user=ubuntu
 ```
 
 ### 2. Via Variables File
@@ -307,7 +299,7 @@ ansible-playbook playbook-linux.yml --ask-become-pass -e @vars.yml
 ansible-playbook playbook-macos.yml --ask-become-pass -e @vars.yml
 ```
 
-`vars.example.yml` includes cloud defaults (`ssh_admin_user`) and notes for bare-metal admin bootstrap.
+`vars.example.yml` includes cloud defaults (`admin_user`) and notes for bare-metal admin bootstrap.
 
 ### 3. Edit Defaults Directly
 
@@ -321,10 +313,8 @@ Edit the role defaults before running the playbook.
 | `openclaw_home` | `/home/openclaw` (Linux) / `/Users/openclaw` (macOS) | User home directory |
 | `openclaw_install_mode` | `release` | `release` or `development` |
 | `openclaw_ssh_keys` | `[]` | List of SSH public keys |
-| `admin_user` | `""` | Optional admin user to create (bare metal, includes NOPASSWD sudoers drop-in) |
-| `admin_ssh_keys` | `[]` | SSH public keys for `admin_user` |
-| `ssh_admin_user` | `""` | Canonical admin user for strict SSH checks |
-| `existing_admin_user` | `""` | Legacy fallback for strict SSH checks (prefer `ssh_admin_user`) |
+| `admin_user` | `""` | Admin username — with `admin_ssh_keys`: creates user (bare metal); without: assumes existing (cloud) |
+| `admin_ssh_keys` | `[]` | SSH public keys for `admin_user` (triggers user creation when non-empty) |
 | `openclaw_repo_url` | `https://github.com/openclaw/openclaw.git` | Git repository (dev mode) |
 | `openclaw_repo_branch` | `main` | Git branch (dev mode) |
 | `tailscale_authkey` | `""` | Tailscale auth key for auto-connect |
@@ -332,34 +322,48 @@ Edit the role defaults before running the playbook.
 
 ### Common Configuration Examples
 
-#### SSH Keys for Remote Access
+#### Cloud (AWS/GCP) — existing `ubuntu` user
 
 ```bash
-ansible-playbook playbook-linux.yml --ask-become-pass \
-  -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
-```
+# Without Tailscale
+ansible-playbook playbook-linux.yml \
+  -e admin_user=ubuntu
 
-#### Admin + OpenClaw SSH Keys (Bare Metal)
-
-```bash
-ansible-playbook playbook-linux.yml --ask-become-pass \
-  -e '{"admin_user":"adminops","admin_ssh_keys":["ssh-ed25519 AAAA... admin@laptop"],"openclaw_ssh_keys":["ssh-ed25519 AAAA... openclaw@laptop"]}'
-```
-
-#### Development Mode with Custom Repository
-
-```bash
-ansible-playbook playbook-linux.yml --ask-become-pass \
-  -e openclaw_install_mode=development \
-  -e openclaw_repo_url=https://github.com/YOUR_USERNAME/openclaw.git \
-  -e openclaw_repo_branch=feature-branch
-```
-
-#### Tailscale Auto-Connect
-
-```bash
-ansible-playbook playbook-linux.yml --ask-become-pass \
+# With Tailscale auto-connect (get key: https://login.tailscale.com/admin/settings/keys)
+ansible-playbook playbook-linux.yml \
+  -e admin_user=ubuntu \
   -e tailscale_authkey=tskey-auth-xxxxxxxxxxxxx
+```
+
+#### Bare Metal (Hetzner/Dedicated) — create admin user
+
+```bash
+# Without Tailscale
+ansible-playbook playbook-linux.yml \
+  -e '{"admin_user":"admin","admin_ssh_keys":["ssh-ed25519 AAAA... you@laptop"]}'
+
+# With Tailscale auto-connect
+ansible-playbook playbook-linux.yml \
+  -e '{"admin_user":"admin","admin_ssh_keys":["ssh-ed25519 AAAA... you@laptop"]}' \
+  -e tailscale_authkey=tskey-auth-xxxxxxxxxxxxx
+```
+
+#### Post-Install Hardening
+
+```bash
+# Strict SSH (key-only, no root login) — requires admin_user
+ansible-playbook playbook-linux-ssh-strict.yml \
+  -e admin_user=ubuntu
+
+# Lock SSH to Tailscale only (run after `tailscale up`)
+ansible-playbook playbook-linux-ssh-lockdown.yml```
+
+#### Development Mode
+
+```bash
+ansible-playbook playbook-linux.yml \
+  -e admin_user=ubuntu \
+  -e openclaw_install_mode=development
 ```
 
 ## License

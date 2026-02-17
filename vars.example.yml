@@ -9,18 +9,11 @@ openclaw_install_mode: "release"
 openclaw_ssh_keys:
   - "ssh-ed25519 AAAA... replace-with-your-openclaw-key"
 
-# Linux admin model
-# Set the admin account used by strict SSH checks.
-# Cloud images (AWS/GCP): usually ubuntu/debian/ec2-user.
-# Bare metal: set this to the admin account you created.
-ssh_admin_user: "ubuntu"
-
-# Optional bootstrap admin creation (bare metal)
-admin_user: ""
+# Admin user — used for SSH strict hardening preflight and (optionally) user creation
+# Cloud images (AWS/GCP): set to existing user, leave admin_ssh_keys empty
+# Bare metal: set username + keys to create the user
+admin_user: "ubuntu"
 admin_ssh_keys: []
-
-# Legacy fallback (prefer ssh_admin_user)
-existing_admin_user: ""
 
 # Optional
 tailscale_authkey: ""
