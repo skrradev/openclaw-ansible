@@ -32,16 +32,15 @@
     mode: '0755'
 
 - name: Configure pnpm for openclaw user
-  ansible.builtin.shell:
-    cmd: |
-      pnpm config set global-dir {{ openclaw_home }}/.local/share/pnpm
-      pnpm config set global-bin-dir {{ openclaw_home }}/.local/bin
-    executable: /bin/bash
-  become: true
-  become_user: "{{ openclaw_user }}"
-  environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
-  changed_when: true  # Always consider changed as pnpm config may update
+  ansible.builtin.blockinfile:
+    path: "{{ openclaw_home }}/.npmrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw pnpm config"
+    block: |
+      global-dir={{ openclaw_home }}/.local/share/pnpm
+      global-bin-dir={{ openclaw_home }}/.local/bin
+    create: true
+    owner: "{{ openclaw_user }}"
+    mode: '0644'
 
 # Include appropriate installation method based on mode
 - name: Include release installation (pnpm install -g)
@@ -64,4 +63,3 @@
     owner: "{{ openclaw_user }}"
     mode: '0644'
     insertafter: EOF
-

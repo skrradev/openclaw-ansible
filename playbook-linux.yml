@@ -70,6 +70,7 @@
       ansible.builtin.set_fact:
         ansible_env: "{{ ansible_env | combine({'PATH': '/home/linuxbrew/.linuxbrew/bin:' + (ansible_env.PATH | default(lookup('env', 'PATH')))}) }}"
       when: homebrew_check_final.stat.exists
+      changed_when: false
 
     - name: Install Ansible collections
       ansible.builtin.command: ansible-galaxy collection install -r requirements.yml

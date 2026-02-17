@@ -34,6 +34,7 @@
     - name: Add Homebrew to PATH for current session
       ansible.builtin.set_fact:
         ansible_env: "{{ ansible_env | combine({'PATH': '/opt/homebrew/bin:' + (ansible_env.PATH | default(lookup('env', 'PATH')))}) }}"
+      changed_when: false
 
   roles:
     - macos
