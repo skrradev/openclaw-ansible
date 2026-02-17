@@ -3,8 +3,8 @@
 
 - name: Set distribution facts for Tailscale
   ansible.builtin.set_fact:
-    tailscale_distro: "{{ ansible_distribution | lower }}"
-    tailscale_release: "{{ ansible_distribution_release }}"
+    tailscale_distro: "{{ ansible_facts['distribution'] | lower }}"
+    tailscale_release: "{{ ansible_facts['distribution_release'] }}"
 
 - name: Add Tailscale GPG key
   ansible.builtin.get_url:
@@ -29,4 +29,9 @@
     name: tailscaled
     enabled: true
     state: started
+
+- name: Connect to Tailscale network
+  ansible.builtin.command: tailscale up --authkey={{ tailscale_authkey }}
+  when: tailscale_authkey | length > 0
+  changed_when: true
 

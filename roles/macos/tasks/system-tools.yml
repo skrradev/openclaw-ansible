@@ -11,7 +11,7 @@
       - unzip
     state: present
   environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_env.PATH }}"
+    PATH: "/opt/homebrew/bin:{{ ansible_facts['env']['PATH'] }}"
 
 
 - name: Configure git defaults
