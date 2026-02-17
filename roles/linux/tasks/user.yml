@@ -76,6 +76,23 @@
     openclaw_user: openclaw
     openclaw_home: /home/openclaw
 
+- name: Check if Linuxbrew prefix exists
+  ansible.builtin.stat:
+    path: "{{ homebrew_prefix }}"
+  register: linuxbrew_prefix
+
+- name: Ensure openclaw owns Linuxbrew prefix for runtime skill installs
+  ansible.builtin.file:
+    path: "{{ homebrew_prefix }}"
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
+    recurse: true
+  when:
+    - linuxbrew_prefix.stat.exists
+    - (linuxbrew_prefix.stat.pw_name | default('')) != openclaw_user or
+      (linuxbrew_prefix.stat.gr_name | default('')) != openclaw_user
+
 # DBus and systemd user services
 - name: Get openclaw user ID
   ansible.builtin.command: id -u openclaw
