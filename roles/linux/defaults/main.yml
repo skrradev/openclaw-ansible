@@ -21,6 +21,10 @@ openclaw_home: /home/openclaw
 package_manager: apt
 homebrew_prefix: /home/linuxbrew/.linuxbrew
 
+# Timezone settings (Linux)
+# If empty, timezone role falls back to UTC.
+timezone: ""
+
 # Installation mode: 'release' or 'development'
 # release: Install via pnpm install -g openclaw@latest
 # development: Clone repo, build from source, link globally

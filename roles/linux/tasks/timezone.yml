@@ -1,0 +1,109 @@
+---
+# Linux timezone configuration
+
+- name: Get timezone from variable or use UTC fallback
+  ansible.builtin.set_fact:
+    target_timezone: "{{ timezone if timezone | default('') | length > 0 else 'UTC' }}"
+  changed_when: false
+
+- name: Check user-provided timezone exists in zoneinfo
+  ansible.builtin.stat:
+    path: "/usr/share/zoneinfo/{{ timezone }}"
+  register: timezone_candidate
+  when: timezone | default('') | length > 0
+  changed_when: false
+
+- name: Assert user-provided timezone is valid
+  ansible.builtin.assert:
+    that:
+      - timezone_candidate.stat.exists
+    fail_msg: >-
+      Invalid timezone '{{ timezone }}'. Use a valid zoneinfo name like UTC, Europe/Berlin, or America/New_York.
+    quiet: true
+  when: timezone | default('') | length > 0
+
+- name: Show current timezone
+  ansible.builtin.shell:
+    cmd: |
+      date
+      cat /etc/timezone || true
+    executable: /bin/bash
+  register: timezone_before
+  changed_when: false
+
+- name: Ensure tzdata is installed
+  ansible.builtin.apt:
+    name: tzdata
+    state: present
+    update_cache: true
+
+- name: Set timezone using timezone module
+  community.general.timezone:
+    name: "{{ target_timezone }}"
+  register: timezone_change
+
+- name: Update timezone file
+  ansible.builtin.copy:
+    content: "{{ target_timezone }}\n"
+    dest: /etc/timezone
+    owner: root
+    group: root
+    mode: '0644'
+  register: timezone_file
+
+- name: Update tzdata
+  ansible.builtin.command: dpkg-reconfigure -f noninteractive tzdata
+  when: timezone_file.changed or timezone_change.changed
+
+- name: Wait for timezone changes to take effect
+  ansible.builtin.pause:
+    seconds: 2
+  when: timezone_file.changed or timezone_change.changed
+
+- name: Show timezone change result
+  ansible.builtin.shell:
+    cmd: |
+      echo "Current date and timezone:"
+      date
+      echo
+      echo "Configured timezone:"
+      cat /etc/timezone
+      echo
+      echo "Timezone symlink:"
+      ls -l /etc/localtime
+    executable: /bin/bash
+  register: timezone_after
+  changed_when: false
+
+- name: Read configured timezone file
+  ansible.builtin.command: cat /etc/timezone
+  register: timezone_file_current
+  changed_when: false
+
+- name: Read effective timezone from timedatectl
+  ansible.builtin.command: timedatectl show -p Timezone --value
+  register: timezone_effective
+  changed_when: false
+  failed_when: false
+
+- name: Assert timezone is configured correctly
+  ansible.builtin.assert:
+    that:
+      - timezone_file_current.stdout | trim == target_timezone
+      - timezone_effective.rc != 0 or (timezone_effective.stdout | trim == target_timezone)
+    fail_msg: >-
+      Timezone verification failed. Expected {{ target_timezone }}, file=/etc/timezone has
+      '{{ timezone_file_current.stdout | trim }}', timedatectl reports
+      '{{ timezone_effective.stdout | trim }}'.
+    quiet: true
+
+- name: Display timezone changes
+  ansible.builtin.debug:
+    msg: |
+      Timezone has been updated:
+
+      Before:
+      {{ timezone_before.stdout }}
+
+      After:
+      {{ timezone_after.stdout }}

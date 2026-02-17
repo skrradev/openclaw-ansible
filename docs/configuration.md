@@ -217,6 +217,17 @@ These variables only apply when `openclaw_install_mode: development`
   -e nodejs_version=20.x
   ```
 
+### Timezone Configuration (Linux only)
+
+#### `timezone`
+- **Type**: String
+- **Default**: `""` (empty)
+- **Description**: Host timezone to apply. If empty, installer uses `UTC`.
+- **Example**:
+  ```bash
+  -e timezone=Europe/Berlin
+  ```
+
 ### Tailscale Configuration
 
 #### `tailscale_authkey`

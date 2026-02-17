@@ -1,4 +1,8 @@
 ---
+- name: Include timezone configuration tasks
+  ansible.builtin.include_tasks: timezone.yml
+  tags: [timezone]
+
 - name: Include system tools installation tasks
   ansible.builtin.include_tasks: system-tools.yml
   tags: [system-tools]
