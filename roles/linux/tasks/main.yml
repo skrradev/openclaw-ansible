@@ -11,6 +11,10 @@
   ansible.builtin.include_tasks: admin-user.yml
   tags: [user, admin-user]
 
+- name: Include Homebrew installation tasks
+  ansible.builtin.include_tasks: homebrew.yml
+  tags: [homebrew]
+
 - name: Include user creation tasks
   ansible.builtin.include_tasks: user.yml
   tags: [user]

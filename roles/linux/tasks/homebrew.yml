@@ -1,0 +1,61 @@
+---
+# Linuxbrew installation (must run as non-root user)
+
+- name: Check if Homebrew (Linuxbrew) is installed
+  ansible.builtin.stat:
+    path: "{{ homebrew_prefix }}/bin/brew"
+  register: homebrew_check
+
+- name: Select Homebrew installer user
+  ansible.builtin.set_fact:
+    homebrew_installer_user: >-
+      {{ admin_user if admin_user | default('') | length > 0
+         else (ansible_facts['env']['SUDO_USER'] | default(lookup('env', 'USER'))) }}
+  when: not homebrew_check.stat.exists
+  changed_when: false
+
+- name: Assert Homebrew installer user is non-root
+  ansible.builtin.assert:
+    that:
+      - homebrew_installer_user | length > 0
+      - homebrew_installer_user != "root"
+    fail_msg: >-
+      Homebrew installation requires a non-root installer user.
+      Set admin_user (recommended for root-first hosts like Hetzner), then rerun.
+    quiet: true
+  when: not homebrew_check.stat.exists
+
+- name: Verify Homebrew installer user exists
+  ansible.builtin.command: "id -u {{ homebrew_installer_user }}"
+  changed_when: false
+  when: not homebrew_check.stat.exists
+
+- name: Install build-essential for Homebrew
+  ansible.builtin.apt:
+    name:
+      - build-essential
+    state: present
+  when: not homebrew_check.stat.exists
+
+- name: Download Homebrew installer script
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+    dest: /tmp/homebrew-install.sh
+    mode: '0755'
+  when: not homebrew_check.stat.exists
+
+- name: Install Homebrew (Linuxbrew) from script as non-root user
+  ansible.builtin.command: /bin/bash /tmp/homebrew-install.sh
+  args:
+    creates: "{{ homebrew_prefix }}/bin/brew"
+  environment:
+    NONINTERACTIVE: "1"
+  become: true
+  become_user: "{{ homebrew_installer_user }}"
+  when: not homebrew_check.stat.exists
+
+- name: Remove temporary Homebrew installer script
+  ansible.builtin.file:
+    path: /tmp/homebrew-install.sh
+    state: absent
+  when: not homebrew_check.stat.exists

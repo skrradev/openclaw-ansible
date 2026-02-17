@@ -6,7 +6,6 @@
 
   vars:
     ansible_python_interpreter: /usr/bin/python3
-    homebrew_install_script_path: /tmp/homebrew-install.sh
 
   pre_tasks:
     - name: Update apt cache and upgrade all packages
@@ -23,54 +22,6 @@
       ansible.builtin.package:
         name: acl
         state: present
-
-
-    - name: Check if Homebrew (Linuxbrew) is installed
-      ansible.builtin.stat:
-        path: /home/linuxbrew/.linuxbrew/bin/brew
-      register: homebrew_check
-
-    - name: Install build-essential for Homebrew
-      ansible.builtin.apt:
-        name:
-          - build-essential
-        state: present
-      when: not homebrew_check.stat.exists
-
-    - name: Download Homebrew installer script
-      ansible.builtin.get_url:
-        url: "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-        dest: "{{ homebrew_install_script_path }}"
-        mode: '0755'
-      when: not homebrew_check.stat.exists
-      become: false
-
-    - name: Install Homebrew (Linuxbrew) from script
-      ansible.builtin.command: /bin/bash {{ homebrew_install_script_path }}
-      args:
-        creates: /home/linuxbrew/.linuxbrew/bin/brew
-      environment:
-        NONINTERACTIVE: "1"
-      when: not homebrew_check.stat.exists
-      become: false
-
-    - name: Re-check if Homebrew (Linuxbrew) is installed
-      ansible.builtin.stat:
-        path: /home/linuxbrew/.linuxbrew/bin/brew
-      register: homebrew_check_final
-
-    - name: Remove temporary Homebrew installer script
-      ansible.builtin.file:
-        path: "{{ homebrew_install_script_path }}"
-        state: absent
-      when: not homebrew_check.stat.exists
-      become: false
-
-    - name: Add Homebrew to PATH for current session
-      ansible.builtin.set_fact:
-        ansible_env: "{{ ansible_facts['env'] | combine({'PATH': '/home/linuxbrew/.linuxbrew/bin:' + (ansible_facts['env']['PATH'] | default(lookup('env', 'PATH')))}) }}"
-      when: homebrew_check_final.stat.exists
-      changed_when: false
 
     - name: Install Ansible collections
       ansible.builtin.command: ansible-galaxy collection install -r requirements.yml
