@@ -16,7 +16,9 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw config"
     block: |
       # Add Homebrew (Linuxbrew) to PATH
-      eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
+      if [ -x "{{ homebrew_prefix }}/bin/brew" ]; then
+        eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
+      fi
 
       # Add pnpm to PATH
       export PNPM_HOME="{{ openclaw_home }}/.local/share/pnpm"
