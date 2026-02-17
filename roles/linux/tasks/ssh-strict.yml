@@ -72,6 +72,13 @@
   register: strict_ssh_config
   notify: Restart sshd
 
+- name: Ensure /run/sshd exists for sshd -t validation
+  ansible.builtin.file:
+    path: /run/sshd
+    state: directory
+    mode: '0755'
+  when: strict_ssh_config.changed
+
 - name: Validate sshd configuration after strict hardening
   ansible.builtin.command: /usr/sbin/sshd -t
   changed_when: false
