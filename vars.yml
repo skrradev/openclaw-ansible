@@ -1,0 +1,6 @@
+---
+admin_user: "ubuntu"
+admin_ssh_keys: []
+
+tailscale_authkey: ""
+timezone: "UTC" 
