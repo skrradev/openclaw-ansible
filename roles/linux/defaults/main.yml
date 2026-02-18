@@ -53,3 +53,8 @@ openclaw_ssh_keys: []
 # Example: ubuntu (AWS), debian (GCP), adminops (bare metal)
 admin_user: ""
 admin_ssh_keys: []
+
+# SSH lockdown: additional CIDRs allowed to SSH besides Tailscale
+# Used by playbook-linux-ssh-lockdown.yml
+# Example: ["35.235.240.0/20"] for GCP IAP
+allow_ssh_cidrs: []

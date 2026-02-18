@@ -4,6 +4,10 @@
   connection: local
   become: true
 
+  vars:
+    # Additional CIDRs allowed to SSH (e.g. GCP IAP: 35.235.240.0/20)
+    allow_ssh_cidrs: []
+
   pre_tasks:
     - name: Install Ansible collections
       ansible.builtin.command: ansible-galaxy collection install -r requirements.yml
@@ -38,6 +42,16 @@
       register: ufw_status
       changed_when: false
       failed_when: "'22/tcp' not in ufw_status.stdout or 'tailscale0' not in ufw_status.stdout"
+
+    - name: Allow SSH from additional CIDRs
+      community.general.ufw:
+        rule: allow
+        src: "{{ item }}"
+        port: '22'
+        proto: tcp
+        comment: "SSH from {{ item }}"
+      loop: "{{ allow_ssh_cidrs }}"
+      when: allow_ssh_cidrs | length > 0
 
     - name: Remove open SSH rule
       community.general.ufw:

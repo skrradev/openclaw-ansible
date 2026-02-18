@@ -22,6 +22,11 @@ tailscale_authkey: ""
 nodejs_version: "22.x"
 timezone: "UTC"  # Linux only (if empty, role uses UTC)
 
+# SSH lockdown: additional CIDRs allowed to SSH besides Tailscale
+# Used by playbook-linux-ssh-lockdown.yml
+# GCP IAP: 35.235.240.0/20
+allow_ssh_cidrs: []
+
 # Development mode overrides (optional)
 # openclaw_repo_url: "https://github.com/openclaw/openclaw.git"
 # openclaw_repo_branch: "main"
