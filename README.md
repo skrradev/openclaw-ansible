@@ -18,13 +18,13 @@ Automated, hardened installation of [OpenClaw](https://github.com/openclaw/openc
 - **Multi-OS Support**: Debian, Ubuntu, and macOS
 - **Direct Ansible install**: Explicit playbook-driven setup
 - **Auto-configuration**: DBus, systemd, environment setup
-- **pnpm installation**: Uses `pnpm install -g openclaw@latest`
+- **pnpm installation**: Uses `pnpm install -g openclaw@<openclaw_version>` (default: `latest`)
 
 ## Quick Start
 
 ### Release Mode (Recommended)
 
-Install the latest stable version from npm via Ansible:
+Install OpenClaw from npm via Ansible (default version is `latest`):
 
 ```bash
 git clone https://github.com/skrradev/openclaw-ansible.git
@@ -118,9 +118,9 @@ systemctl --user status my-worker.service
 ## Installation Modes
 
 ### Release Mode (Default)
-- Installs via `pnpm install -g openclaw@latest`
-- Gets latest stable version from npm registry
-- Automatic updates via `pnpm install -g openclaw@latest`
+- Installs via `pnpm install -g openclaw@<openclaw_version>`
+- `openclaw_version` defaults to `latest` (you can pin a version)
+- Automatic updates when `openclaw_version: latest`
 - **Recommended for production**
 
 ### Development Mode
@@ -205,7 +205,7 @@ admin_user: "ubuntu"  # or debian/ec2-user, based on image
 ### Common (All OS)
 - Homebrew package manager
 - Node.js 22.x + pnpm
-- OpenClaw via `pnpm install -g openclaw@latest`
+- OpenClaw via `pnpm install -g openclaw@<openclaw_version>` (default: `latest`)
 - Essential development tools
 - Git, zsh, oh-my-zsh
 
@@ -312,6 +312,7 @@ Edit the role defaults before running the playbook.
 | `openclaw_user` | `openclaw` | System user name |
 | `openclaw_home` | `/home/openclaw` (Linux) / `/Users/openclaw` (macOS) | User home directory |
 | `openclaw_install_mode` | `release` | `release` or `development` |
+| `openclaw_version` | `latest` | OpenClaw npm version for release mode |
 | `openclaw_ssh_keys` | `[]` | List of SSH public keys |
 | `admin_user` | `""` | Admin username — with `admin_ssh_keys`: creates user (bare metal); without: assumes existing (cloud) |
 | `admin_ssh_keys` | `[]` | SSH public keys for `admin_user` (triggers user creation when non-empty) |
@@ -339,6 +340,11 @@ ansible-playbook playbook-linux.yml \
 ansible-playbook playbook-linux.yml \
   -e admin_user=ubuntu \
   -e timezone=Europe/Berlin
+
+# Pin OpenClaw release version
+ansible-playbook playbook-linux.yml \
+  -e admin_user=ubuntu \
+  -e openclaw_version=0.9.4
 ```
 
 #### Bare Metal (Hetzner/Dedicated) — create admin user

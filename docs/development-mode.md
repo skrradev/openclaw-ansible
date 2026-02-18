@@ -9,12 +9,14 @@ This guide explains how to install OpenClaw in **development mode**, where the a
 | Feature | Release Mode | Development Mode |
 |---------|-------------|------------------|
 | Source | npm registry | GitHub repository |
-| Installation | `pnpm install -g openclaw@latest` | `git clone` + `pnpm build` |
+| Installation | `pnpm install -g openclaw@<openclaw_version>` | `git clone` + `pnpm build` |
 | Location | `~/.local/share/pnpm/global/...` | `~/code/openclaw/` |
 | Binary | Global pnpm package | Symlink to `bin/openclaw.js` |
-| Updates | `pnpm install -g openclaw@latest` | `git pull` + `pnpm build` |
+| Updates | `pnpm install -g openclaw@<openclaw_version>` | `git pull` + `pnpm build` |
 | Use Case | Production, stable deployments | Development, testing, debugging |
 | Recommended For | End users | Developers, contributors |
+
+`openclaw_version` defaults to `latest` in release mode.
 
 ## Installation
 
@@ -253,7 +255,7 @@ rm ~/.local/bin/openclaw
 rm -rf ~/code/openclaw
 
 # Install from npm
-pnpm install -g openclaw@latest
+pnpm install -g openclaw@latest  # or pin a specific version, e.g. openclaw@0.9.4
 ```
 
 ## Troubleshooting

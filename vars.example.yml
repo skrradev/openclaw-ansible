@@ -4,6 +4,8 @@
 
 # Installation mode: release or development
 openclaw_install_mode: "release"
+# Release version to install from npm (default: latest)
+openclaw_version: "latest"
 
 # SSH keys for openclaw user
 openclaw_ssh_keys:

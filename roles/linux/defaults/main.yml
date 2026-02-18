@@ -26,9 +26,10 @@ homebrew_prefix: /home/linuxbrew/.linuxbrew
 timezone: ""
 
 # Installation mode: 'release' or 'development'
-# release: Install via pnpm install -g openclaw@latest
+# release: Install via pnpm install -g openclaw@<openclaw_version>
 # development: Clone repo, build from source, link globally
 openclaw_install_mode: "release"
+openclaw_version: "latest"
 
 # Development mode settings (only used when openclaw_install_mode: development)
 openclaw_repo_url: "https://github.com/openclaw/openclaw.git"

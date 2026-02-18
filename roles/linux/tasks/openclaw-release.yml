@@ -2,9 +2,12 @@
 # Release mode installation - Install via pnpm from npm registry
 
 - name: Install OpenClaw globally as openclaw user (using pnpm)
-  ansible.builtin.shell:
-    cmd: pnpm install -g openclaw@latest
-    executable: /bin/bash
+  ansible.builtin.command:
+    argv:
+      - pnpm
+      - install
+      - -g
+      - "openclaw@{{ openclaw_version | default('latest', true) }}"
   become: true
   become_user: "{{ openclaw_user }}"
   environment:
@@ -12,5 +15,4 @@
     PATH: "{{ openclaw_home }}/.local/bin:{{ homebrew_prefix }}/bin:/usr/local/bin:/usr/bin:/bin"
     HOME: "{{ openclaw_home }}"
   register: openclaw_install
-  changed_when: "'Already up to date' not in openclaw_install.stdout"
-
+  changed_when: "'Already up to date' not in ((openclaw_install.stdout | default('')) + (openclaw_install.stderr | default('')))"

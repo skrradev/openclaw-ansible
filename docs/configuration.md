@@ -20,6 +20,10 @@ ansible-playbook playbook-linux.yml --ask-become-pass \
   -e openclaw_install_mode=development \
   -e "openclaw_ssh_keys=['ssh-ed25519 AAAAC3... user@host']"
 
+# Linux (release mode, pin OpenClaw version)
+ansible-playbook playbook-linux.yml --ask-become-pass \
+  -e openclaw_version=0.9.4
+
 # Linux (bare metal): admin user + admin SSH key + openclaw SSH key
 ansible-playbook playbook-linux.yml --ask-become-pass \
   -e '{"admin_user":"adminops","admin_ssh_keys":["ssh-ed25519 AAAA... admin@laptop"],"openclaw_ssh_keys":["ssh-ed25519 AAAA... openclaw@laptop"]}'
@@ -139,11 +143,21 @@ Directly edit `roles/linux/defaults/main.yml` or `roles/macos/defaults/main.yml`
 - **Type**: String (`release` or `development`)
 - **Default**: `release`
 - **Description**: Installation mode
-  - `release`: Install via npm (`pnpm install -g openclaw@latest`)
+  - `release`: Install via npm (`pnpm install -g openclaw@<openclaw_version>`)
   - `development`: Clone repo, build from source, symlink binary
 - **Example**:
   ```bash
   -e openclaw_install_mode=development
+  ```
+
+#### `openclaw_version`
+- **Type**: String
+- **Default**: `latest`
+- **Description**: OpenClaw npm version/tag used in release mode (`latest`, `next`, or a pinned semver like `0.9.4`)
+- **Examples**:
+  ```bash
+  -e openclaw_version=latest
+  -e openclaw_version=0.9.4
   ```
 
 ### Development Mode Settings
