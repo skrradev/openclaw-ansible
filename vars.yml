@@ -4,3 +4,4 @@ admin_ssh_keys: []
 
 tailscale_authkey: ""
 timezone: "UTC" 
+allow_ssh_cidrs: []
