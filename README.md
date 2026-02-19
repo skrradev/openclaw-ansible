@@ -320,6 +320,7 @@ Edit the role defaults before running the playbook.
 | `openclaw_repo_branch` | `main` | Git branch (dev mode) |
 | `tailscale_authkey` | `""` | Tailscale auth key for auto-connect |
 | `nodejs_version` | `22.x` (Linux) / `22` (macOS) | Node.js version to install |
+| `openclaw_browser_enabled` | `true` (Linux) | Install Playwright Chromium for browser automation |
 | `timezone` | `""` (Linux) | Linux timezone (fallback: `UTC`) |
 
 ### Common Configuration Examples
@@ -345,6 +346,11 @@ ansible-playbook playbook-linux.yml \
 ansible-playbook playbook-linux.yml \
   -e admin_user=ubuntu \
   -e openclaw_version=0.9.4
+
+# Optional: skip browser install (Linux)
+ansible-playbook playbook-linux.yml \
+  -e admin_user=ubuntu \
+  -e openclaw_browser_enabled=false
 ```
 
 #### Bare Metal (Hetzner/Dedicated) — create admin user

@@ -54,6 +54,10 @@ openclaw_ssh_keys: []
 admin_user: ""
 admin_ssh_keys: []
 
+# Browser settings
+# Default is true; set to false only if browser automation is not needed.
+openclaw_browser_enabled: true
+
 # SSH lockdown: additional CIDRs allowed to SSH besides Tailscale
 # Used by playbook-linux-ssh-lockdown.yml
 # Example: ["35.235.240.0/20"] for GCP IAP

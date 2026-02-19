@@ -38,3 +38,7 @@
 - name: Include OpenClaw setup tasks
   ansible.builtin.include_tasks: openclaw.yml
   tags: [openclaw]
+
+- name: Include browser installation tasks
+  ansible.builtin.include_tasks: browser.yml
+  tags: [browser]

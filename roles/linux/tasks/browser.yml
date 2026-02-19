@@ -1,0 +1,119 @@
+---
+# Headless Chromium via Playwright
+#
+# Why Playwright instead of apt chromium-browser?
+# Ubuntu 24.04 redirects chromium-browser to Snap, which doesn't work
+# from systemd services due to Snap confinement. Playwright provides
+# standalone native binaries for both x86-64 and ARM64.
+#
+# This mirrors the pattern used in OpenClaw's own Dockerfile:
+#   node /app/node_modules/playwright-core/cli.js install --with-deps chromium
+
+- name: Skip browser installation
+  ansible.builtin.debug:
+    msg: "Browser installation skipped (openclaw_browser_enabled={{ openclaw_browser_enabled }})"
+  when: not (openclaw_browser_enabled | default(true) | bool)
+
+- name: Install browser
+  when: openclaw_browser_enabled | default(true) | bool
+  block:
+    - name: Install Chromium runtime dependencies for Playwright
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - fonts-liberation
+          - libasound2
+          - libatk-bridge2.0-0
+          - libatk1.0-0
+          - libatspi2.0-0
+          - libcairo2
+          - libcups2
+          - libdbus-1-3
+          - libdrm2
+          - libfontconfig1
+          - libfreetype6
+          - libgbm1
+          - libglib2.0-0
+          - libgtk-3-0
+          - libnspr4
+          - libnss3
+          - libpango-1.0-0
+          - libx11-6
+          - libx11-xcb1
+          - libxcb1
+          - libxcomposite1
+          - libxdamage1
+          - libxext6
+          - libxfixes3
+          - libxkbcommon0
+          - libxrandr2
+          - libxrender1
+          - libxshmfence1
+          - libxss1
+          - libxtst6
+          - xdg-utils
+        state: present
+
+    - name: Create Playwright cache directory
+      ansible.builtin.file:
+        path: "{{ openclaw_home }}/.cache/ms-playwright"
+        state: directory
+        owner: "{{ openclaw_user }}"
+        group: "{{ openclaw_user }}"
+        mode: "0755"
+
+    # Install browser binary as unprivileged user (avoid running npx as root).
+    - name: Install Playwright Chromium binary as openclaw user
+      ansible.builtin.command:
+        argv:
+          - npx
+          - playwright
+          - install
+          - chromium
+      become: true
+      become_user: "{{ openclaw_user }}"
+      environment:
+        HOME: "{{ openclaw_home }}"
+        PATH: "{{ openclaw_home }}/.local/bin:{{ homebrew_prefix }}/bin:/usr/local/bin:/usr/bin:/bin"
+        PNPM_HOME: "{{ openclaw_home }}/.local/share/pnpm"
+      register: playwright_install
+      changed_when: "'Downloading Chromium' in ((playwright_install.stdout | default('')) + (playwright_install.stderr | default('')))"
+
+    # Keep cache ownership consistent for openclaw.
+    - name: Fix Playwright cache ownership
+      ansible.builtin.file:
+        path: "{{ openclaw_home }}/.cache/ms-playwright"
+        state: directory
+        owner: "{{ openclaw_user }}"
+        group: "{{ openclaw_user }}"
+        recurse: true
+
+    # The binary path includes a version number that changes with updates:
+    # ~/.cache/ms-playwright/chromium-XXXX/chrome-linux/chrome
+    - name: Find Playwright Chromium binary
+      ansible.builtin.shell:
+        cmd: >
+          set -o pipefail &&
+          find {{ (openclaw_home + '/.cache/ms-playwright') | quote }} -path '*/chromium-*/chrome-linux/chrome' -type f 2>/dev/null |
+          sort -V |
+          tail -1
+        executable: /bin/bash
+      register: chromium_binary
+      changed_when: false
+      failed_when: chromium_binary.stdout | trim == ""
+
+    - name: Verify Chromium binary works
+      ansible.builtin.command:
+        argv:
+          - "{{ chromium_binary.stdout | trim }}"
+          - --version
+      become: true
+      become_user: "{{ openclaw_user }}"
+      environment:
+        HOME: "{{ openclaw_home }}"
+      register: chromium_version
+      changed_when: false
+
+    - name: Display detected Chromium version
+      ansible.builtin.debug:
+        msg: "Playwright Chromium: {{ chromium_version.stdout }} at {{ chromium_binary.stdout | trim }}"
