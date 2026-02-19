@@ -5,3 +5,4 @@ admin_ssh_keys: []
 tailscale_authkey: ""
 timezone: "UTC" 
 allow_ssh_cidrs: []
+openclaw_version: "2026.2.17"
