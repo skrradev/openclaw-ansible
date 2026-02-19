@@ -17,24 +17,65 @@
 - name: Install browser
   when: openclaw_browser_enabled | default(true) | bool
   block:
+    - name: Select runtime package variants for current distro
+      ansible.builtin.set_fact:
+        playwright_use_t64_packages: >-
+          {{
+            (
+              ansible_facts['distribution'] == 'Ubuntu' and
+              (ansible_facts['distribution_version'] is version('24.04', '>='))
+            ) or (
+              ansible_facts['distribution'] == 'Debian' and
+              (ansible_facts['distribution_major_version'] | int >= 13)
+            )
+          }}
+        playwright_libasound_package: >-
+          {{
+            'libasound2t64' if playwright_use_t64_packages else 'libasound2'
+          }}
+        playwright_libatk_bridge_package: >-
+          {{
+            'libatk-bridge2.0-0t64' if playwright_use_t64_packages else 'libatk-bridge2.0-0'
+          }}
+        playwright_libatk_package: >-
+          {{
+            'libatk1.0-0t64' if playwright_use_t64_packages else 'libatk1.0-0'
+          }}
+        playwright_libatspi_package: >-
+          {{
+            'libatspi2.0-0t64' if playwright_use_t64_packages else 'libatspi2.0-0'
+          }}
+        playwright_libcups_package: >-
+          {{
+            'libcups2t64' if playwright_use_t64_packages else 'libcups2'
+          }}
+        playwright_libglib_package: >-
+          {{
+            'libglib2.0-0t64' if playwright_use_t64_packages else 'libglib2.0-0'
+          }}
+        playwright_libgtk_package: >-
+          {{
+            'libgtk-3-0t64' if playwright_use_t64_packages else 'libgtk-3-0'
+          }}
+
     - name: Install Chromium runtime dependencies for Playwright
       ansible.builtin.apt:
         name:
           - ca-certificates
           - fonts-liberation
-          - libasound2
-          - libatk-bridge2.0-0
-          - libatk1.0-0
-          - libatspi2.0-0
+          - "{{ playwright_libasound_package }}"
+          - "{{ playwright_libatk_bridge_package }}"
+          - "{{ playwright_libatk_package }}"
+          - "{{ playwright_libatspi_package }}"
           - libcairo2
-          - libcups2
+          - "{{ playwright_libcups_package }}"
           - libdbus-1-3
           - libdrm2
           - libfontconfig1
           - libfreetype6
           - libgbm1
-          - libglib2.0-0
-          - libgtk-3-0
+          - "{{ playwright_libglib_package }}"
+          - "{{ playwright_libgtk_package }}"
           - libnspr4
           - libnss3
           - libpango-1.0-0
