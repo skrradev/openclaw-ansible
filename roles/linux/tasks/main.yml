@@ -40,5 +40,9 @@
   tags: [openclaw]
 
 - name: Include browser installation tasks
-  ansible.builtin.include_tasks: browser.yml
+  ansible.builtin.include_tasks:
+    file: browser.yml
+    apply:
+      tags:
+        - browser
   tags: [browser]
