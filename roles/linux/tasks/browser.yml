@@ -133,12 +133,13 @@
         recurse: true
 
     # The binary path includes a version number that changes with updates:
-    # ~/.cache/ms-playwright/chromium-XXXX/chrome-linux/chrome
+    # ARM64: ~/.cache/ms-playwright/chromium-XXXX/chrome-linux/chrome
+    # AMD64: ~/.cache/ms-playwright/chromium-XXXX/chrome-linux64/chrome
     - name: Find Playwright Chromium binary
       ansible.builtin.shell:
         cmd: >
           set -o pipefail &&
-          find {{ (openclaw_home + '/.cache/ms-playwright') | quote }} -path '*/chromium-*/chrome-linux/chrome' -type f 2>/dev/null |
+          find {{ (openclaw_home + '/.cache/ms-playwright') | quote }} -path '*/chromium-*/chrome-linux*/chrome' -type f 2>/dev/null |
           sort -V |
           tail -1
         executable: /bin/bash
