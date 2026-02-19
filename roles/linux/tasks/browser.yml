@@ -17,7 +17,7 @@
 - name: Install browser
   when: openclaw_browser_enabled | default(true) | bool
   block:
-    - name: Select runtime package variants for current distro
+    - name: Detect whether current distro uses t64 package variants
       ansible.builtin.set_fact:
         playwright_use_t64_packages: >-
           {{
@@ -29,6 +29,9 @@
               (ansible_facts['distribution_major_version'] | int >= 13)
             )
           }}
+
+    - name: Select runtime package variants for current distro
+      ansible.builtin.set_fact:
         playwright_libasound_package: >-
           {{
             'libasound2t64' if playwright_use_t64_packages else 'libasound2'
