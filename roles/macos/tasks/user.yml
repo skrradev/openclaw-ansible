@@ -1,6 +1,12 @@
 ---
+- name: Create openclaw group
+  ansible.builtin.group:
+    name: openclaw
+    state: present
+
 - name: Create openclaw system user
   ansible.builtin.user:
+    group: openclaw
     name: openclaw
     comment: "OpenClaw Service User"
     system: true
