@@ -25,17 +25,8 @@ homebrew_prefix: /home/linuxbrew/.linuxbrew
 # If empty, timezone role falls back to UTC.
 timezone: ""
 
-# Installation mode: 'release' or 'development'
-# release: Install via pnpm install -g openclaw@<openclaw_version>
-# development: Clone repo, build from source, link globally
-openclaw_install_mode: "release"
+# OpenClaw release version to install from npm
 openclaw_version: "latest"
-
-# Development mode settings (only used when openclaw_install_mode: development)
-openclaw_repo_url: "https://github.com/openclaw/openclaw.git"
-openclaw_repo_branch: "main"
-openclaw_code_dir: "{{ openclaw_home }}/code"
-openclaw_repo_dir: "{{ openclaw_code_dir }}/openclaw"
 
 # SSH keys for openclaw user
 # Add your public SSH keys here to allow SSH access as openclaw user

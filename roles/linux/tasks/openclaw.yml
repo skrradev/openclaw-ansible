@@ -46,11 +46,18 @@
     group: "{{ openclaw_user }}"
     mode: '0644'
 
-# Include appropriate installation method based on mode
-- name: Include release installation (pnpm install -g)
-  ansible.builtin.include_tasks: openclaw-release.yml
-  when: openclaw_install_mode == "release"
-
-- name: Include development installation (git clone + build + link)
-  ansible.builtin.include_tasks: openclaw-development.yml
-  when: openclaw_install_mode == "development"
+- name: Install OpenClaw globally as openclaw user (using pnpm)
+  ansible.builtin.command:
+    argv:
+      - pnpm
+      - install
+      - -g
+      - "openclaw@{{ openclaw_version | default('latest', true) }}"
+  become: true
+  become_user: "{{ openclaw_user }}"
+  environment:
+    PNPM_HOME: "{{ openclaw_home }}/.local/share/pnpm"
+    PATH: "{{ openclaw_home }}/.local/bin:{{ homebrew_prefix }}/bin:/usr/local/bin:/usr/bin:/bin"
+    HOME: "{{ openclaw_home }}"
+  register: openclaw_install
+  changed_when: "'Already up to date' not in ((openclaw_install.stdout | default('')) + (openclaw_install.stderr | default('')))"

@@ -2,8 +2,6 @@
 # OpenClaw Ansible variables for Linux
 # Copy to vars.yml and edit values for your environment.
 
-# Installation mode: release or development
-openclaw_install_mode: "release"
 # Release version to install from npm (default: latest)
 openclaw_version: "latest"
 
@@ -26,7 +24,3 @@ timezone: "UTC"  # Linux only (if empty, role uses UTC)
 # Used by playbook-linux-ssh-lockdown.yml
 # GCP IAP: 35.235.240.0/20
 allow_ssh_cidrs: []
-
-# Development mode overrides (optional)
-# openclaw_repo_url: "https://github.com/openclaw/openclaw.git"
-# openclaw_repo_branch: "main"

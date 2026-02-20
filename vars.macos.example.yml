@@ -2,8 +2,6 @@
 # OpenClaw Ansible variables for macOS
 # Copy to vars.yml and edit values for your environment.
 
-# Installation mode: release or development
-openclaw_install_mode: "release"
 # Release version to install from npm (default: latest)
 openclaw_version: "2026.2.17"
 
