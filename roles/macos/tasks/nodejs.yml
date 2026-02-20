@@ -5,11 +5,13 @@
   community.general.homebrew:
     name: "node@{{ nodejs_version }}"
     state: present
+  become: false
   environment:
     PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
 
 - name: Link Node.js into Homebrew prefix
   ansible.builtin.command: brew link --overwrite node@{{ nodejs_version }}
+  become: false
   environment:
     PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
   register: brew_link_result
@@ -20,6 +22,7 @@
 
 - name: Install pnpm globally
   ansible.builtin.command: npm install -g pnpm
+  become: false
   environment:
     PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
   args:

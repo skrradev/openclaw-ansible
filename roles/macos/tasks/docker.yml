@@ -10,6 +10,7 @@
   community.general.homebrew_cask:
     name: docker
     state: present
+  become: false
   environment:
     PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
   when: not docker_desktop.stat.exists

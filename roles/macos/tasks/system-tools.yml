@@ -10,6 +10,7 @@
       - jq
       - unzip
     state: present
+  become: false
   environment:
     PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
 
