@@ -15,12 +15,13 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK - OpenClaw config"
     block: |
       # Add Homebrew to PATH (macOS)
-      eval "$(/opt/homebrew/bin/brew shellenv)"
+      eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
 
       # Add pnpm to PATH
       export PATH="{{ openclaw_home }}/.local/bin:$PATH"
     create: true
     owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
     mode: '0644'
 
 - name: Set openclaw user as primary user for installation
@@ -34,6 +35,7 @@
     path: "{{ openclaw_home }}/.ssh"
     state: directory
     owner: openclaw
+    group: openclaw
     mode: '0700'
 
 - name: Add SSH authorized keys for openclaw user

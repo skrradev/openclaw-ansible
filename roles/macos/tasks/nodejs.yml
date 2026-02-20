@@ -6,19 +6,22 @@
     name: "node@{{ nodejs_version }}"
     state: present
   environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_facts['env']['PATH'] }}"
+    PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
 
 - name: Link Node.js into Homebrew prefix
   ansible.builtin.command: brew link --overwrite node@{{ nodejs_version }}
   environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_facts['env']['PATH'] }}"
-  changed_when: false
-  failed_when: false
+    PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
+  register: brew_link_result
+  changed_when: "'Linking' in brew_link_result.stdout"
+  failed_when:
+    - brew_link_result.rc != 0
+    - "'Already linked' not in brew_link_result.stderr"
 
 - name: Install pnpm globally
   ansible.builtin.command: npm install -g pnpm
   environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_facts['env']['PATH'] }}"
+    PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
   args:
-    creates: /opt/homebrew/bin/pnpm
+    creates: "{{ homebrew_prefix }}/bin/pnpm"
 

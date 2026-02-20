@@ -11,7 +11,7 @@
     name: docker
     state: present
   environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_facts['env']['PATH'] }}"
+    PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
   when: not docker_desktop.stat.exists
 
 - name: Wait for Docker Desktop to be available

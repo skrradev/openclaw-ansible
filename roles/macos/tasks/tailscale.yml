@@ -11,6 +11,6 @@
     name: tailscale
     state: present
   environment:
-    PATH: "/opt/homebrew/bin:{{ ansible_facts['env']['PATH'] }}"
+    PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"
   when: not tailscale_app.stat.exists
 

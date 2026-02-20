@@ -4,6 +4,7 @@
     path: "{{ item.path }}"
     state: directory
     owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
     mode: "{{ item.mode }}"
   loop:
     - { path: "{{ openclaw_config_dir }}", mode: '0755' }
@@ -17,6 +18,7 @@
     path: "{{ item }}"
     state: directory
     owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
     mode: '0755'
   loop:
     - "{{ openclaw_home }}/.local/share/pnpm"
@@ -28,6 +30,7 @@
     path: "{{ openclaw_home }}/.local/share/pnpm"
     state: directory
     owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
     recurse: true
     mode: '0755'
 
@@ -40,6 +43,7 @@
       global-bin-dir={{ openclaw_home }}/.local/bin
     create: true
     owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
     mode: '0644'
 
 # Include appropriate installation method based on mode
@@ -61,5 +65,6 @@
       export PATH="{{ openclaw_home }}/.local/bin:$PNPM_HOME:$PATH"
     create: true
     owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_user }}"
     mode: '0644'
     insertafter: EOF
