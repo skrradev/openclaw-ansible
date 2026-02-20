@@ -1,0 +1,23 @@
+---
+# OpenClaw Ansible variables for macOS
+# Copy to vars.yml and edit values for your environment.
+
+# Installation mode: release or development
+openclaw_install_mode: "release"
+# Release version to install from npm (default: latest)
+openclaw_version: "2026.2.17"
+
+# SSH keys for openclaw user
+openclaw_ssh_keys:
+  - "ssh-ed25519 AAAA... replace-with-your-openclaw-key"
+
+# Optional
+tailscale_authkey: ""
+nodejs_version: "22"
+
+# Homebrew prefix (Apple Silicon: /opt/homebrew, Intel: /usr/local)
+# homebrew_prefix: /opt/homebrew
+
+# Development mode overrides (optional)
+# openclaw_repo_url: "https://github.com/openclaw/openclaw.git"
+# openclaw_repo_branch: "main"

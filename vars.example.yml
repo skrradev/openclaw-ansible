@@ -1,5 +1,5 @@
 ---
-# OpenClaw Ansible variables example
+# OpenClaw Ansible variables for Linux
 # Copy to vars.yml and edit values for your environment.
 
 # Installation mode: release or development
