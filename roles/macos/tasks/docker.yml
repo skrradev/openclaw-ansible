@@ -10,7 +10,6 @@
   community.general.homebrew_cask:
     name: docker
     state: present
-    sudo_password: "{{ ansible_become_password | default('') }}"
   become: false
   environment:
     PATH: "{{ homebrew_prefix }}/bin:{{ ansible_facts['env']['PATH'] }}"

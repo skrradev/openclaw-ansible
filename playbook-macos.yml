@@ -31,6 +31,15 @@
       when: not homebrew_check.stat.exists
       become: false
 
+    - name: Allow passwordless installer for Homebrew cask installs
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/homebrew-cask-{{ ansible_facts['env']['USER'] }}"
+        mode: '0440'
+        owner: root
+        group: wheel
+        content: "{{ ansible_facts['env']['USER'] }} ALL=(root) NOPASSWD: /usr/sbin/installer *\n"
+        validate: /usr/sbin/visudo -cf %s
+
     - name: Add Homebrew to PATH for current session
       ansible.builtin.set_fact:
         ansible_env: "{{ ansible_facts['env'] | combine({'PATH': '/opt/homebrew/bin:' + (ansible_facts['env']['PATH'] | default(lookup('env', 'PATH')))}) }}"
@@ -38,3 +47,9 @@
 
   roles:
     - macos
+
+  post_tasks:
+    - name: Remove temporary passwordless installer sudoers rule
+      ansible.builtin.file:
+        path: "/etc/sudoers.d/homebrew-cask-{{ ansible_facts['env']['USER'] }}"
+        state: absent
