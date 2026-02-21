@@ -10,7 +10,7 @@
     name: openclaw
     comment: "OpenClaw Service User"
     system: true
-    shell: /bin/bash
+    shell: /bin/zsh
     create_home: true
     home: /Users/openclaw
     state: present
