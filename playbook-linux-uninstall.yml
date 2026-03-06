@@ -139,11 +139,22 @@
         - "{{ openclaw_home }}/.local/bin"
         - "{{ openclaw_home }}/.npmrc"
 
-    # 7. Clean environment variables from shell profiles
+    # 7. Clean shell profiles
     - name: Remove OPENCLAW/CLAWDBOT env vars from shell profiles
       ansible.builtin.lineinfile:
         path: "{{ openclaw_home }}/{{ item }}"
         regexp: '^\s*export\s+(OPENCLAW_|CLAWDBOT_)'
+        state: absent
+      loop:
+        - .profile
+        - .bashrc
+        - .bash_profile
+      failed_when: false
+
+    - name: Remove openclaw bash completion source from shell profiles
+      ansible.builtin.lineinfile:
+        path: "{{ openclaw_home }}/{{ item }}"
+        regexp: 'completions/openclaw\.bash'
         state: absent
       loop:
         - .profile
