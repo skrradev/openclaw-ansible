@@ -1,28 +1,28 @@
 ---
 - name: Include system tools installation tasks
-  ansible.builtin.include_tasks: system-tools.yml
+  ansible.builtin.import_tasks: system-tools.yml
   tags: [system-tools]
 
 - name: Include Tailscale installation tasks
-  ansible.builtin.include_tasks: tailscale.yml
+  ansible.builtin.import_tasks: tailscale.yml
   tags: [tailscale]
 
 - name: Include user creation tasks
-  ansible.builtin.include_tasks: user.yml
+  ansible.builtin.import_tasks: user.yml
   tags: [user]
 
 - name: Include Docker installation tasks
-  ansible.builtin.include_tasks: docker.yml
+  ansible.builtin.import_tasks: docker.yml
   tags: [docker]
 
 - name: Include firewall configuration tasks
-  ansible.builtin.include_tasks: firewall.yml
+  ansible.builtin.import_tasks: firewall.yml
   tags: [firewall]
 
 - name: Include Node.js installation tasks
-  ansible.builtin.include_tasks: nodejs.yml
+  ansible.builtin.import_tasks: nodejs.yml
   tags: [nodejs]
 
 - name: Include OpenClaw setup tasks
-  ansible.builtin.include_tasks: openclaw.yml
+  ansible.builtin.import_tasks: openclaw.yml
   tags: [openclaw]
