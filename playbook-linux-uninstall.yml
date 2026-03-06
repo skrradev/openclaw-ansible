@@ -102,19 +102,18 @@
       failed_when: false
       changed_when: false
 
-    # 5. Uninstall pnpm package
-    - name: Uninstall openclaw pnpm package
+    # 5. Uninstall npm package
+    - name: Uninstall openclaw npm package
       ansible.builtin.command:
         argv:
-          - pnpm
+          - npm
           - uninstall
           - -g
           - openclaw
       become: true
       become_user: "{{ openclaw_user }}"
       environment:
-        PNPM_HOME: "{{ openclaw_home }}/.local/share/pnpm"
-        PATH: "{{ openclaw_home }}/.local/bin:{{ homebrew_prefix }}/bin:/usr/local/bin:/usr/bin:/bin"
+        PATH: "{{ openclaw_home }}/.local/bin:/usr/local/bin:/usr/bin:/bin"
         HOME: "{{ openclaw_home }}"
       failed_when: false
       changed_when: true
@@ -130,12 +129,12 @@
         path: "{{ openclaw_home }}/.cache/ms-playwright"
         state: absent
 
-    - name: Remove pnpm global store
+    - name: Remove npm global store
       ansible.builtin.file:
         path: "{{ item }}"
         state: absent
       loop:
-        - "{{ openclaw_home }}/.local/share/pnpm"
+        - "{{ openclaw_home }}/.local/lib"
         - "{{ openclaw_home }}/.local/bin"
         - "{{ openclaw_home }}/.npmrc"
 

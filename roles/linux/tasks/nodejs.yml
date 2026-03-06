@@ -31,7 +31,3 @@
     name: nodejs
     state: present
 
-- name: Install pnpm globally
-  ansible.builtin.command: npm install -g pnpm
-  args:
-    creates: /usr/local/bin/pnpm

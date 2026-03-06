@@ -20,9 +20,8 @@
         eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
       fi
 
-      # Add pnpm to PATH
-      export PNPM_HOME="{{ openclaw_home }}/.local/share/pnpm"
-      export PATH="{{ openclaw_home }}/.local/bin:$PNPM_HOME:$PATH"
+      # Add local bin to PATH
+      export PATH="{{ openclaw_home }}/.local/bin:$PATH"
     create: true
     owner: "{{ openclaw_user }}"
     group: "{{ openclaw_user }}"
@@ -49,13 +48,13 @@
       # To grant full sudo (NOT RECOMMENDED):
       #   openclaw ALL=(ALL) NOPASSWD: ALL
 
-      # Service control - openclaw service only
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl start openclaw
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop openclaw
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart openclaw
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl status openclaw
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable openclaw
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable openclaw
+      # Service control - openclaw-gateway service only
+      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl start openclaw-gateway
+      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop openclaw-gateway
+      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart openclaw-gateway
+      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl status openclaw-gateway
+      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable openclaw-gateway
+      openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable openclaw-gateway
       # Tailscale - diagnostics + connect/disconnect
       # NOTE: 'up' allows flags like --advertise-exit-node. For tighter control,
       # remove 'up' and 'down' lines - operator must then manage VPN manually.
@@ -72,8 +71,8 @@
       openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale status --json
       openclaw ALL=(root) NOPASSWD: /usr/bin/tailscale whois --json *
 
-      # Journal access - openclaw logs only
-      openclaw ALL=(ALL) NOPASSWD: /usr/bin/journalctl -u openclaw *
+      # Journal access - openclaw-gateway logs only
+      openclaw ALL=(ALL) NOPASSWD: /usr/bin/journalctl -u openclaw-gateway *
     validate: /usr/sbin/visudo -cf %s
 
 - name: Set openclaw user as primary user for installation
