@@ -384,6 +384,16 @@ ansible-playbook playbook-linux.yml \
   -e openclaw_install_mode=development
 ```
 
+### Uninstall (Linux)
+
+Remove OpenClaw while keeping system infrastructure (Docker, Node.js, Tailscale, firewall rules, `openclaw` user):
+
+```bash
+ansible-playbook playbook-linux-uninstall.yml
+```
+
+This removes the systemd service, pnpm package, config directory (`~/.openclaw/`), Playwright cache, pnpm global store, and temp files. Re-run `playbook-linux.yml` to reinstall.
+
 ## License
 
 MIT - see [LICENSE](LICENSE)
