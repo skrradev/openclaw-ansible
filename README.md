@@ -384,15 +384,26 @@ ansible-playbook playbook-linux.yml \
   -e openclaw_install_mode=development
 ```
 
-### Uninstall (Linux)
+### Uninstall
 
 Remove OpenClaw while keeping system infrastructure (Docker, Node.js, Tailscale, firewall rules, `openclaw` user):
 
 ```bash
+# Linux
 ansible-playbook playbook-linux-uninstall.yml
+
+# macOS
+ansible-playbook playbook-macos-uninstall.yml --ask-become-pass
+
+# macOS — also remove the openclaw system user
+ansible-playbook playbook-macos-uninstall.yml --ask-become-pass -e openclaw_remove_user=true
 ```
 
-This removes the systemd service, pnpm package, config directory (`~/.openclaw/`), Playwright cache, pnpm global store, and temp files. Re-run `playbook-linux.yml` to reinstall.
+**Linux** removes the systemd service, pnpm package, config directory (`~/.openclaw/`), Playwright cache, pnpm global store, and temp files.
+
+**macOS** removes the launchd service, npm/pnpm packages (including `acpx`), config directory (`~/.openclaw/`), launch agent plist, shell completions, Playwright cache, and temp files.
+
+Re-run `playbook-linux.yml` or `playbook-macos.yml` to reinstall.
 
 ## License
 
