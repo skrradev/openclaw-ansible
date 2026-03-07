@@ -397,7 +397,14 @@ ansible-playbook playbook-macos-uninstall.yml --ask-become-pass
 
 # macOS — also remove the openclaw system user
 ansible-playbook playbook-macos-uninstall.yml --ask-become-pass -e openclaw_remove_user=true
+
+# macOS — uninstall from a non-default user (e.g. installed under your main user)
+ansible-playbook playbook-macos-uninstall.yml --ask-become-pass \
+  -e openclaw_user=fastclaws \
+  -e openclaw_home=/Users/fastclaws
 ```
+
+By default the playbook targets the `openclaw` system user (`/Users/openclaw`). If OpenClaw was installed under a different user (e.g. your main account), pass `-e openclaw_user=<user> -e openclaw_home=/Users/<user>` to clean the correct home directory.
 
 **Linux** removes the systemd service, pnpm package, config directory (`~/.openclaw/`), Playwright cache, pnpm global store, and temp files.
 
