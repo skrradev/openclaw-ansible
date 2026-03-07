@@ -115,6 +115,14 @@
     group: openclaw
     mode: '0700'
 
+- name: Start systemd user manager for openclaw
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - start
+      - "user@{{ openclaw_uid.stdout }}.service"
+  changed_when: false
+
 - name: Store openclaw UID as fact for later use
   ansible.builtin.set_fact:
     openclaw_uid_value: "{{ openclaw_uid.stdout }}"
